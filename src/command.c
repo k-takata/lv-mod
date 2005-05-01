@@ -66,8 +66,6 @@
 #define COM_FILE_PREV		'p'
 #define COM_FILE_NEXT		'n'
 
-#define IsNumber( c )		( (c) >= '0' && (c) <= '9' )
-
 #ifdef MSDOS
 #define HISTORY_SIZE		2
 #else
@@ -145,6 +143,22 @@ private void CommandCopyToHistory( str_t *str, int length )
     historyIndex = 0;
 }
 
+private int CommandGetChar()
+{
+  int ch;
+
+  if( FALSE == initcmd_mode ){
+    return ConsoleGetChar();
+  }
+
+  ch = initcmd_str[ initcmd_curp++ ];
+  if( initcmd_str[ initcmd_curp ] == NUL ){
+    initcmd_mode = FALSE;
+    free( initcmd_str );
+  }
+  return ch;
+}
+
 private i_str_t *CommandGetLine( file_t *f, byte prompt )
 {
   int ch, ptr, iptr, width, pre_width, index;
@@ -164,13 +178,14 @@ private i_str_t *CommandGetLine( file_t *f, byte prompt )
   pre_width = -1;
   for( ; ; ){
     ConsoleFlush();
-    ch = ConsoleGetChar();
+    ch = CommandGetChar();
     switch( ch ){
     case EOF:
     case BEL: /* C-g */
       if( NULL != istr )
 	IstrFree( istr );
       return NULL;
+    case LF: /* C-j */
     case CR: /* C-m */
       if( NULL == istr )
 	return NULL;
@@ -344,7 +359,7 @@ private boolean_t CommandGetNumber( unsigned int *number, int *newCom )
     ConsolePrints( buf );
 
     ConsoleFlush();
-    ch = ConsoleGetChar();
+    ch = CommandGetChar();
     if( EOF == ch )
       return FALSE;
     else if( BS == ch || DEL == ch ){
@@ -902,7 +917,7 @@ private void CommandCursor( unsigned int arg )
   flagLeft = flagRight = flagUp = flagDown = flagPpage = flagNpage = TRUE;
   step = 1;
   for( ; ; ){
-    ch = ConsoleGetChar();
+    ch = CommandGetChar();
     if( NULL == cur_left || ch != cur_left[ step ] )
       flagLeft = FALSE;
     if( NULL == cur_right || ch != cur_right[ step ] )
@@ -954,7 +969,7 @@ private void CommandColon( unsigned int arg )
   stream_t *st;
   file_list_t *next_target;
 
-  ch = ConsoleGetChar();
+  ch = CommandGetChar();
 
   if( COM_FILE_PREV == ch || COM_FILE_NEXT == ch ){
     if( 0 < arg ){
@@ -1179,7 +1194,7 @@ public void Command( file_t *file, byte **optional )
     }
 
     ConsoleFlush();
-    com = ConsoleGetChar();
+    com = CommandGetChar();
     if( com < 0x00 || com > 0x7f )
       continue;
 

@@ -12,6 +12,12 @@
 
 public byte *editor_program;
 
+public boolean_t initcmd_mode;
+public char *initcmd_str;
+public int initcmd_curp;
+
+#define IsNumber( c )		( (c) >= '0' && (c) <= '9' )
+
 public boolean_t CommandInit();
 public void Command( file_t *file, byte **optional );
 

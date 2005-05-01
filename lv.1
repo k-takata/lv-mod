@@ -11,7 +11,7 @@ lv \- a Powerful Multilingual File Viewer / Grep
 -V
 .br
 .B lv
-[-[+]acdfgiklmnqsuvz]
+[-acdfgiklmnqsuvz] [+acdfgiklmnqsuvz]
 .br
      [-A\fIcoding-system\fP] [-I\fIcoding-system\fP] [-K\fIcoding-system\fP]
 .br
@@ -21,7 +21,9 @@ lv \- a Powerful Multilingual File Viewer / Grep
 .br
      [-T\fInumber\fP] [-W\fIwidth\fP] [-H\fIheight\fP] [-E'\fIeditor'\fP] [-+]
 .br
-     [-] (\fIgrep pattern\fP) [\fIfiles ...\fP]
+     [+\fInumber\fP] [+/\fIgrep-pattern\fP]
+.br
+     [-] (\fIgrep-pattern\fP) [\fIfiles ...\fP]
 .SH DESCRIPTION
 .IP "\fIMultilingual file viewer\fP"
 \fIlv\fP is a powerful multilingual file viewer.
@@ -223,8 +225,12 @@ You can also turn OFF specified options,
 using ``+<option>'' like +c, +d, ... +z.
 .IP "-"
 Treat the following arguments as filenames
-.IP "\fIgrep pattern\fP"
+.IP "\fIgrep-pattern\fP"
 lv works like \fIgrep\fP (1) when its name is \fIlgrep\fP
+.IP "+\fInumber\fP"
+Jump to the specified line immediately when lv is invoked.
+.IP "+/\fIgrep-pattern\fP"
+Search  the specified pattern immediately when lv is invoked.
 .IP "-V"
 Show lv version
 .IP "-h"

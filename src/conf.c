@@ -313,38 +313,52 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
     }
   } else if( TRUE == conf->options && '+' == **argv ){
     s = *argv + 1;
-    while( *s ){
-      switch( *s ){
-#ifndef MSDOS /* IF NOT DEFINED */
-      case 'm': unimap_iso8859 = FALSE; s++; continue;
-#endif /* MSDOS */
-      case 'a': adjust_charset = FALSE; s++; continue;
-      case 'c': allow_ansi_esc = FALSE; s++; continue;
-      case 'd': casefold_search = FALSE; s++; continue;
-      case 'i': casefold_search = FALSE; s++; continue;
-      case 'f': regexp_search = TRUE; s++; continue;
-      case 'g': grep_mode = FALSE; s++; continue;
-      case 'k': kana_conv = FALSE; s++; continue;
-      case 'l': carefully_divide = TRUE; s++; continue;
-      case 'n': line_number = FALSE; s++; continue;
-      case 'q': no_scroll = TRUE; s++; continue;
-      case 's': smooth_paging = FALSE; s++; continue;
-      case 'u': allow_unify = FALSE; s++; continue;
-      case 'v': grep_inverted = FALSE; s++; continue;
-      case 'z': hz_detection = FALSE; s++; continue;
-      case SP:
-      case HT:
-	break;
-      default:
-	UnknownOption( s, location );
+    if( *s == '/' || IsNumber( *s ) ){
+      size_t initcmd_len = strlen( s );
+      initcmd_mode = TRUE;
+      initcmd_curp = 0;
+      initcmd_str = Malloc( initcmd_len + 2 );
+      strcpy( initcmd_str, s );
+      if( *s == '/' ){
+	initcmd_str[ initcmd_len ] = CR;
+      } else if( IsNumber( *s ) && IsNumber( s[ initcmd_len - 1 ] ) ){
+	initcmd_str[ initcmd_len ] = 'g';
       }
-      do {
-	s++;
-	if( '-' == *s || '+' == *s ){
-	  s++;
+      initcmd_str[ initcmd_len + 1 ] = NUL;
+    } else {
+      while( *s ){
+	switch( *s ){
+#ifndef MSDOS /* IF NOT DEFINED */
+	case 'm': unimap_iso8859 = FALSE; s++; continue;
+#endif /* MSDOS */
+	case 'a': adjust_charset = FALSE; s++; continue;
+	case 'c': allow_ansi_esc = FALSE; s++; continue;
+	case 'd': casefold_search = FALSE; s++; continue;
+	case 'i': casefold_search = FALSE; s++; continue;
+	case 'f': regexp_search = TRUE; s++; continue;
+	case 'g': grep_mode = FALSE; s++; continue;
+	case 'k': kana_conv = FALSE; s++; continue;
+	case 'l': carefully_divide = TRUE; s++; continue;
+	case 'n': line_number = FALSE; s++; continue;
+	case 'q': no_scroll = TRUE; s++; continue;
+	case 's': smooth_paging = FALSE; s++; continue;
+	case 'u': allow_unify = FALSE; s++; continue;
+	case 'v': grep_inverted = FALSE; s++; continue;
+	case 'z': hz_detection = FALSE; s++; continue;
+	case SP:
+	case HT:
 	  break;
+	default:
+	  UnknownOption( s, location );
 	}
-      } while( *s );
+	do {
+	  s++;
+	  if( '-' == *s || '+' == *s ){
+	    s++;
+	    break;
+	  }
+	} while( *s );
+      }
     }
   } else {
     if( TRUE == grep_mode && NULL == conf->pattern )
