@@ -512,7 +512,7 @@ private void CommandReload( unsigned int arg )
   byte defaultCodingSystem;
   stream_t st;
 
-  if( NULL != f->sp ){
+  if( NULL != f->sp.iop ){
     label = "cannot reload non-regular files";
     return;
   }
@@ -521,9 +521,9 @@ private void CommandReload( unsigned int arg )
     label = "cannot reload current file";
     return;
   } else {
-    fclose( f->fp );
+    fclose( f->fp.iop );
     st.fp = fp;
-    st.sp = f->sp;
+    st.sp = f->sp.iop;
     st.pid = f->pid;
   }
 
@@ -633,7 +633,7 @@ private void CommandEdit( unsigned int arg )
   byte *fileName;
   int lineNumber;
 
-  if( NULL != f->sp ){
+  if( NULL != f->sp.iop ){
     label = "cannot edit non-regular files";
     return;
   }
@@ -713,7 +713,7 @@ private void CommandPoll( unsigned int arg )
 
   kb_interrupted = FALSE;
 
-  if( NULL != f->sp ){
+  if( NULL != f->sp.iop ){
     label = "cannot poll non-regular files";
     return;
   }
@@ -733,8 +733,8 @@ private void CommandPoll( unsigned int arg )
     ConsoleSetAttribute( 0 );
     ConsoleFlush();
 
-    (void)fseek( f->fp, 0, SEEK_END );
-    pos = ftell( f->fp );
+    (void)IobufFseek( &f->fp, 0, SEEK_END );
+    pos = IobufFtell( &f->fp );
 
     ConsoleEnableInterrupt();
 
@@ -743,8 +743,8 @@ private void CommandPoll( unsigned int arg )
       if( kb_interrupted )
 	break;
 
-      (void)fseek( f->fp, 0, SEEK_END );
-      if( ftell( f->fp ) > pos ){
+      (void)IobufFseek( &f->fp, 0, SEEK_END );
+      if( IobufFtell( &f->fp ) > pos ){
 	// it grew
 	break;
       }

@@ -151,7 +151,7 @@ private void PageLoad( file_t *f, int block, long ptr )
 {
   int i;
 
-  if( fseek( f->fp, ptr, SEEK_SET ) )
+  if( IobufFseek( &f->fp, ptr, SEEK_SET ) )
     perror( "PageLoad()" ), exit( -1 );
 
   f->eof = FALSE;

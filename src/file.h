@@ -27,6 +27,10 @@
 #define FRAME_SIZE	4096U
 #endif /* MSDOS */
 
+#ifdef USE_INTERNAL_IOBUF
+# define IOBUF_DEFAULT_SIZE	256
+#endif
+
 typedef struct {
   int		ptr;
   int		width;
@@ -66,11 +70,20 @@ typedef struct {
 } find_t;
 
 typedef struct {
+  FILE		*iop;
+#ifdef USE_INTERNAL_IOBUF
+  byte		buf[ IOBUF_DEFAULT_SIZE ];
+  size_t	cur;
+  size_t	last;
+#endif
+} iobuf_t;
+
+typedef struct {
   byte		*fileName;
   i_str_t	*fileNameI18N;
   int		fileNameLength;
-  FILE		*fp;
-  FILE		*sp;
+  iobuf_t	fp;
+  iobuf_t	sp;
   int		pid;
   byte		inputCodingSystem;
   byte		outputCodingSystem;
@@ -136,5 +149,20 @@ public byte *FileStatus( file_t *f );
 public byte *FileName( file_t *f );
 
 public void FileInit();
+
+#ifndef USE_INTERNAL_IOBUF
+# define IobufGetc( a )		getc( (a)->iop )
+# define IobufUngetc( a, b )	ungetc( a, (b)->iop )
+# define IobufFtell( a )	ftell( (a)->iop )
+# define IobufFseek( a, b, c )	fseek( (a)->iop, b, c)
+# define IobufFeof( a )		feof( (a)->iop )
+#else
+public inline int IobufGetc( iobuf_t *iobuf );
+public inline int IobufUngetc( int ch, iobuf_t *iobuf );
+public long IobufFtell( iobuf_t *iobuf );
+public int IobufFseek( iobuf_t *iobuf, long off, int mode );
+public int IobufFeof( iobuf_t *iobuf );
+#endif
+#define IobufPutc( a, b )	putc( a, (b)->iop )
 
 #endif /* __FILE_H__ */

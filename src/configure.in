@@ -57,5 +57,16 @@ AC_DEFUN([AM_LANGINFO_CODESET],
 
 AM_LANGINFO_CODESET
 
+AC_MSG_CHECKING(whether fastio is used)
+AC_ARG_ENABLE(fastio,
+	[ --enable-fastio          tries to reduce stdio overhead],
+	[if ! test "$enableval" = no; then
+	 	AC_DEFINE(USE_INTERNAL_IOBUF, 1)
+		AC_MSG_RESULT(yes)
+	 else
+		AC_MSG_RESULT(no)
+	 fi],
+	[AC_MSG_RESULT(no)])
+
 dnl AC_OUTPUT(Makefile src/Makefile)
 AC_OUTPUT(Makefile)

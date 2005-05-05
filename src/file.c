@@ -68,6 +68,57 @@ public void FileFreeLine( file_t *f )
   }
 }
 
+#ifdef USE_INTERNAL_IOBUF
+public inline int IobufGetc( iobuf_t *iobuf )
+{
+  if( iobuf->cur >= iobuf->last ){
+    /* no stream buffer, reset and fill now */
+    iobuf->cur = 0;
+    iobuf->last = fread( iobuf->buf, sizeof( byte ), IOBUF_DEFAULT_SIZE, iobuf->iop );
+    if( iobuf->last <= 0 ){
+      return EOF;
+    }
+  }
+  return iobuf->buf[ iobuf->cur++ ];
+}
+
+public inline int IobufUngetc( int ch, iobuf_t *iobuf )
+{
+  if( iobuf->cur == 0 ){
+    /* XXX: it should be tied to fp sanely */
+    return EOF;
+  }
+  iobuf->buf[ --iobuf->cur ] = (byte)ch;
+  return ch;
+}
+
+public long IobufFtell( iobuf_t *iobuf )
+{
+  long ptr;
+  ptr = ftell( iobuf->iop );
+  if( iobuf->cur == iobuf->last ){
+    return ptr;
+  }
+  return ptr - ( iobuf->last - iobuf->cur );
+}
+
+public int IobufFseek( iobuf_t *iobuf, long off, int mode )
+{
+  iobuf->cur = iobuf->last = 0;  /* flush all iobuf */
+  return fseek( iobuf->iop, off, mode );
+}
+
+public int IobufFeof( iobuf_t *iobuf )
+{
+  if( iobuf->cur == iobuf->last ){
+    return feof( iobuf->iop );
+  } else {
+    return 1;
+  }
+}
+#endif
+
+
 /*
  * 現在のファイルポインタから 1行を読み込んでバッファに格納する.
  * コード系の自動判別の対象となる場合, 自動判別を行なう.
@@ -93,21 +144,21 @@ public byte *FileLoadLine( file_t *f, int *length, boolean_t *simple )
   count = 0;
   idx = 0;
 
-  while( EOF != (ch = getc( f->fp )) ){
+  while( EOF != (ch = IobufGetc( &f->fp )) ){
     len++;
     load_array[ count ][ idx++ ] = (byte)ch;
     if( LF == ch ){
       /* UNIX style */
       break;
     } else if( CR == ch ){
-      if( LF == (ch = getc( f->fp )) ){
+      if( LF == (ch = IobufGetc( &f->fp )) ){
 	/* MSDOS style */
       } else if( EOF == ch ){
 	/* need to avoid EOF due to pre-load of that */
 	ch = LF;
       } else {
 	/* Mac style */
-	ungetc( ch, f->fp );
+	IobufUngetc( ch, &f->fp );
       }
       load_array[ count ][ idx - 1 ] = LF;
       break;
@@ -207,23 +258,23 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
   ptr = f->lastPtr;
   segment = f->lastSegment;
 
-  if( fseek( f->fp, ptr, SEEK_SET ) )
+  if( IobufFseek( &f->fp, ptr, SEEK_SET ) )
     perror( "FileStretch()" ), exit( -1 );
 
 #ifndef MSDOS /* IF NOT DEFINED */
-  if( NULL != f->sp ){
-    while( EOF != (ch = getc( f->sp )) ){
-      putc( ch, f->fp );
+  if( NULL != f->sp.iop ){
+    while( EOF != (ch = IobufGetc( &f->sp )) ){
+      IobufPutc( ch, &f->fp );
       count++;
       if( LF == ch || CR == ch || count == (LOAD_SIZE * LOAD_COUNT) ){
 	if( CR == ch ){
-	  if( LF != (ch = getc( f->sp )) )
-	    ungetc( ch, f->sp );
+	  if( LF != (ch = IobufGetc( &f->sp )) )
+	    IobufUngetc( ch, &f->sp );
 	  else
-	    putc( LF, f->fp );
+	    IobufPutc( LF, &f->fp );
 	}
 	count = 0;
-	if( 0 > (ptr = ftell( f->fp )) )
+	if( 0 > (ptr = IobufFtell( &f->fp )) )
 	  perror( "FileStretch()" ), exit( -1 );
 	if( ++line == LV_PAGE_SIZE ){
 	  f->totalLines += line;
@@ -249,21 +300,21 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
 	  return FALSE;
       }
     }
-    if( -1 != f->pid && feof( f->sp ) ){
+    if( -1 != f->pid && IobufFeof( &f->sp ) ){
       int status;
       wait( &status );
     }
   } else {
 #endif /* MSDOS */
-    while( EOF != (ch = getc( f->fp )) ){
+    while( EOF != (ch = IobufGetc( &f->fp )) ){
       count++;
       if( LF == ch || CR == ch || count == (LOAD_SIZE * LOAD_COUNT) ){
 	if( CR == ch ){
-	  if( LF != (ch = getc( f->fp )) )
-	    ungetc( ch, f->fp );
+	  if( LF != (ch = IobufGetc( &f->fp )) )
+	    IobufUngetc( ch, &f->fp );
 	}
 	count = 0;
-	if( 0 > (ptr = ftell( f->fp )) )
+	if( 0 > (ptr = IobufFtell( &f->fp )) )
 	  perror( "FileStretch()" ), exit( -1 );
 	if( ++line == LV_PAGE_SIZE ){
 	  f->totalLines += line;
@@ -301,7 +352,7 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
       segment++;
       f->totalLines += line;
       f->lastSegment = segment;
-      if( 0 > (f->lastPtr = ftell( f->fp )) )
+      if( 0 > (f->lastPtr = IobufFtell( &f->fp )) )
 	perror( "FileStretch()" ), exit( -1 );
     }
     f->done = TRUE;
@@ -325,7 +376,7 @@ public boolean_t FileSeek( file_t *f, unsigned int segment )
     if( FALSE == FileStretch( f, segment ) )
       return FALSE;
 
-  if( fseek( f->fp, f->slot[ Frame( segment ) ][ Slot( segment ) ], SEEK_SET ) )
+  if( IobufFseek( &f->fp, f->slot[ Frame( segment ) ][ Slot( segment ) ], SEEK_SET ) )
     perror( "FileSeek()" ), exit( -1 );
 
   return TRUE;
@@ -392,8 +443,14 @@ public file_t *FileAttach( byte *fileName, stream_t *st,
   f->fileNameI18N	= NULL;
   f->fileNameLength	= 0;
 
-  f->fp			= st->fp;
-  f->sp			= st->sp;
+  f->fp.iop		= st->fp;
+  f->sp.iop		= st->sp;
+#ifdef USE_INTERNAL_IOBUF
+  f->fp.cur		= 0;
+  f->fp.last		= 0;
+  f->sp.cur		= 0;
+  f->sp.last		= 0;
+#endif
   f->pid		= st->pid;
   f->lastSegment	= 0;
   f->totalLines		= 0L;
