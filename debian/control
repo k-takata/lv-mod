@@ -1,0 +1,21 @@
+Source: lv
+Section: text
+Priority: optional
+Maintainer: GOTO Masanori <gotom@debian.org>
+Build-Depends: debhelper (>> 4.0.0), libncurses5-dev
+Standards-Version: 3.6.0
+
+Package: lv
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: bzip2
+Description:  Powerful Multilingual File Viewer
+ lv is a powerful file viewer like less.
+ lv can decode and encode multilingual streams through
+ many coding systems:
+ ISO-8859, ISO-2022, EUC, SJIS, Big5, HZ, Unicode.
+ .
+ It recognizes multi-bytes patterns as regular
+ expressions, lv also provides multilingual grep.
+ In addition, lv can recognize ANSI escape sequences
+ for text decoration.

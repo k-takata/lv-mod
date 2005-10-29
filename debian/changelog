@@ -1,0 +1,188 @@
+lv (4.51-2) unstable; urgency=low
+
+  * Add 3 (+1) patches:
+    - debian/@patch.lv.20050502_~+num-pat-option: Add +num and +/pattern
+      option.
+    - debian/@patch.lv.20050506_%src%file.c_~enable-fastio-use-fread: Improve
+      large file processing performance over typically +40% to +300%.
+    - debian/patch.lv.misc: Enable above changes.
+    - debian/@patch.lv.20051030_%src%_~use_off_t: Update copyright year to
+      2005.  Support large file.  (Closes: #173060)
+    - debian/rules: Likewise.
+
+ -- GOTO Masanori <gotom@debian.org>  Fri,  6 May 2005 15:05:17 +0900
+
+lv (4.51-1) unstable; urgency=low
+
+  * New upstream release.  (Closes: #291528)
+  * Change maintainer address.
+
+ -- GOTO Masanori <gotom@debian.org>  Mon,  2 May 2005 17:43:31 +0900
+
+lv (4.50-1) unstable; urgency=low
+
+  * New upstream release.  (Closes: #220716)
+  * Lgrep segv problem is fixed when lgrep greps through many files
+    (Closes: #188288)
+  * Wrong ISO-2022 final byte is fixed.  (Closes #207718)
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Sun, 16 Nov 2003 01:21:59 +0900
+
+lv (4.49.5-2) unstable; urgency=high
+
+  * rebuild 4.49.5-1 under libc6 2.3.1-17.  4.49.5-1 was built under
+    unexisted libc6 version.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Wed, 14 May 2003 22:15:46 +0900
+
+lv (4.49.5-1) unstable; urgency=high
+
+  * lv has possible local root exploit problem.  lv always reads .lv file
+    in the current directory.  So if ill-intentioned user could put an .lv
+    with the line '-E/path/to/malicious/program', any user who uses the v
+    (edit) command in that directory will unwittingly execute the malicious
+    program; this could be exploited to run an arbitrary script with root
+    permissions.  This version fixes the problem.  Bug found by 
+    Leonard Stiles <ljs@uk2.net>.  (#190941).
+  * lv does not check environment variable EDITOR or VISUAL, it does not 
+    follow debian policy 12.4.  This version fixes this problem.
+    Patched by Michael Weber <michaelw@debian.org>.  (Closes: #181402)
+  * Fix 'unaligned access to' message from kernel due to unaligned 
+    access on 64 bit architecture machine.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Mon, 12 May 2003 17:20:38 +0900
+
+lv (4.49.4-8) unstable; urgency=low
+
+  * Fix 'problem when stdin isn't tty and there are file options'.
+    Patched by Fumitoshi UKAI <ukai@debian.or.jp>. Closes: #127861
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Mon,  7 Oct 2002 10:40:23 +0900
+
+lv (4.49.4-7) unstable; urgency=low
+
+  * debian/control: fix typo in description field.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Wed, 21 Nov 2001 09:24:26 +0900
+
+lv (4.49.4-6) unstable; urgency=low
+
+  * lv.1: fix .SH NAME format. when you used apropos and man -k, the
+    error was displayed (closes: #119125).
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Mon, 12 Nov 2001 00:55:42 +0900
+
+lv (4.49.4-5) unstable; urgency=low
+
+  * append debian/postinst, debian/prerm script (I forgot!). these scripts 
+    register pager alternatives.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Wed,  7 Nov 2001 16:41:09 +0900
+
+lv (4.49.4-4) unstable; urgency=low
+
+  * debian/control: add build-dependency libncurses5-dev (closes: #118437).
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Tue,  6 Nov 2001 23:23:50 +0900
+
+lv (4.49.4-3) unstable; urgency=low
+
+  * applied the patch which forces displaying text whether @TERM is 
+    valid or not (X-ML-Name: debian-users @debian.or.jp, X-Mail-Count: 30379).
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Tue,  6 Nov 2001 01:09:03 +0900
+
+lv (4.49.4-2) unstable; urgency=low
+
+  * Update Standards-Version: 3.5.2.
+  * I believe Bugs#102893 is resolved in this release
+    (I guess that SPARC64 build environment have some unmatch of lv
+    and its dependency library) (Closes: #102893).
+  * Experimental patch version 4.49.4.1.
+    This patch supports ISO-8859-10,13,14,15, Copyright update.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Mon,  5 Nov 2001 23:08:19 +0900
+
+lv (4.49.4-1) unstable; urgency=low
+
+  * New Upstream Version.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Wed, 27 Sep 2000 03:03:46 +0900
+
+lv (4.49.3-5) frozen unstable; urgency=low
+
+  * src/command.c: Deleted comments of line 187 and added key bind of
+    'DEL'. Reported by John Belmonte <john@nanaon-sha.co.jp>,
+    patched by Tomohiro KUBOTA <kubota@debian.or.jp>. (closes: #66054)
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Thu, 22 Jun 2000 23:06:34 +0900
+
+lv (4.49.3-4) frozen unstable; urgency=low
+
+  * Changelog from lv 4.49.3-2 and 4.49.3-3, both of which were never
+    officially released.
+    - debian/control: Added entry: `Recommends: bzip2'.
+    - debian/postinst: Fixed alternatives: Now symlink path changed to
+      /usr/share/man/man1 instead of /usr/man/man1 (closes: #54948).
+    - Updated to Standards-Version 3.0.1.
+    - debian/changelog: Added distribution: frozen.
+
+ -- Keita Maehara <maehara@debian.org>  Sun, 13 Feb 2000 17:49:09 +0900
+
+lv (4.49.3-3) frozen unstable; urgency=low
+
+  * Updated Standards-Version: 3.0.1 .
+  * debian/changelog: added frozen dist.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Thu, 10 Feb 2000 17:32:25 +0900
+
+lv (4.49.3-2) unstable; urgency=low
+
+  * debian/control: Added the entry, 'Recommends: bzip2'.
+  * debian/postinst: Fixed update-alternatives, the link changed
+    /usr/share/man/man1 instead of /usr/man/man1. (closes: #54948)
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Wed,  2 Feb 2000 18:26:25 +0900
+
+lv (4.49.3-1) unstable; urgency=low
+
+  * New upstream version.
+  * Fix install directory according to the FHS.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Thu,  4 Nov 1999 18:57:56 +0900
+
+lv (4.49.2-2) unstable; urgency=low
+
+  * Corresponding to pager alternatives. (closes: #45613)
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Wed, 13 Oct 1999 18:59:43 +0900
+
+lv (4.49.2-1) unstable; urgency=low
+
+  * New upstream version.
+  * lv can deal with max files from 32 to unlimited.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Sun, 19 Sep 1999 17:53:44 +0900
+
+lv (4.49-1) unstable; urgency=low
+
+  * New upstream version.
+  * Fixed BUG#38790.
+
+ -- GOTO Masanori <gotom@debian.or.jp>  Sun, 29 Aug 1999 17:51:13 +0900
+
+lv (4.42-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- GOTO Masanori <gotom@cs.titech.ac.jp>  Mon, 17 May 1999 18:21:02 +0900
+
+lv (4.40-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- GOTO Masanori <gotom@cs.titech.ac.jp>  Thu,  6 May 1999 17:04:46 +0900
+
+Local variables:
+mode: debian-changelog
+End:
