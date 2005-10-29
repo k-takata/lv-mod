@@ -92,20 +92,28 @@ public inline int IobufUngetc( int ch, iobuf_t *iobuf )
   return ch;
 }
 
-public long IobufFtell( iobuf_t *iobuf )
+public offset_t IobufFtell( iobuf_t *iobuf )
 {
-  long ptr;
+  offset_t ptr;
+# ifdef HAVE_FSEEKO
+  ptr = ftello( iobuf->iop );
+# else
   ptr = ftell( iobuf->iop );
+# endif
   if( iobuf->cur == iobuf->last ){
     return ptr;
   }
   return ptr - ( iobuf->last - iobuf->cur );
 }
 
-public int IobufFseek( iobuf_t *iobuf, long off, int mode )
+public int IobufFseek( iobuf_t *iobuf, offset_t off, int mode )
 {
   iobuf->cur = iobuf->last = 0;  /* flush all iobuf */
+# ifdef HAVE_FSEEKO
+  return fseeko( iobuf->iop, off, mode );
+# else
   return fseek( iobuf->iop, off, mode );
+# endif
 }
 
 public int IobufFeof( iobuf_t *iobuf )
@@ -248,7 +256,7 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
 {
   int ch, count;
   unsigned int segment, line;
-  long ptr;
+  offset_t ptr;
 
   if( TRUE == f->done )
     return FALSE;
@@ -283,7 +291,7 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
 	    if( FRAME_SIZE == ++f->lastFrame
 	       ||
 	       NULL == (f->slot[ f->lastFrame ]
-			= (long *)malloc( sizeof( long ) * SLOT_SIZE ))
+			= (offset_t *)malloc( sizeof( offset_t ) * SLOT_SIZE ))
 	       ){
 	      f->done = TRUE;
 	      f->truncated = TRUE;
@@ -322,7 +330,7 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
 	  if( 0 == Slot( ++segment ) ){
 	    if( FRAME_SIZE == ++f->lastFrame
 	       || NULL == (f->slot[ f->lastFrame ]
-			   = (long *)malloc( sizeof( long ) * SLOT_SIZE ))
+			   = (offset_t *)malloc( sizeof( offset_t ) * SLOT_SIZE ))
 	       ){
 	      f->done = TRUE;
 	      f->truncated = TRUE;
@@ -454,7 +462,7 @@ public file_t *FileAttach( byte *fileName, stream_t *st,
   f->pid		= st->pid;
   f->lastSegment	= 0;
   f->totalLines		= 0L;
-  f->lastPtr		= 0L;
+  f->lastPtr		= 0;
 
   f->lastFrame		= 0;
 
@@ -489,8 +497,8 @@ public void FilePreload( file_t *f )
   for( i = 0 ; i < FRAME_SIZE ; i++ )
     f->slot[ i ] = NULL;
 
-  f->slot[ 0 ]		= (long *)Malloc( sizeof( long ) * SLOT_SIZE );
-  f->slot[ 0 ][ 0 ]	= 0L;
+  f->slot[ 0 ]		= (offset_t *)Malloc( sizeof( offset_t ) * SLOT_SIZE );
+  f->slot[ 0 ][ 0 ]	= 0;
 
   FileCacheInit( f );
   FileStretch( f, 0 );

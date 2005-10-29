@@ -9,6 +9,7 @@
 #define __FILE_H__
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <itable.h>
 #include <ctable.h>
@@ -78,6 +79,12 @@ typedef struct {
 #endif
 } iobuf_t;
 
+#ifdef HAVE_FSEEKO
+typedef off_t	offset_t;
+#else
+typedef long	offset_t;
+#endif
+
 typedef struct {
   byte		*fileName;
   i_str_t	*fileNameI18N;
@@ -96,7 +103,7 @@ typedef struct {
   unsigned int	lastSegment;
   unsigned int	lastFrame;
   unsigned long	totalLines;
-  long		lastPtr;
+  offset_t	lastPtr;
   boolean_t	done;
   boolean_t	eof;
   boolean_t	top;
@@ -107,7 +114,7 @@ typedef struct {
   screen_t	screen;
   boolean_t	used[ BLOCK_SIZE ];
   page_t	page[ BLOCK_SIZE ];
-  long		*slot[ FRAME_SIZE ];
+  offset_t	*slot[ FRAME_SIZE ];
 } file_t;
 
 #ifdef MSDOS
@@ -153,14 +160,19 @@ public void FileInit();
 #ifndef USE_INTERNAL_IOBUF
 # define IobufGetc( a )		getc( (a)->iop )
 # define IobufUngetc( a, b )	ungetc( a, (b)->iop )
-# define IobufFtell( a )	ftell( (a)->iop )
-# define IobufFseek( a, b, c )	fseek( (a)->iop, b, c)
+# ifdef HAVE_FSEEKO
+#  define IobufFtell( a )	ftello( (a)->iop )
+#  define IobufFseek( a, b, c )	fseeko( (a)->iop, b, c)
+# else
+#  define IobufFtell( a )	ftell( (a)->iop )
+#  define IobufFseek( a, b, c )	fseek( (a)->iop, b, c)
+# endif
 # define IobufFeof( a )		feof( (a)->iop )
 #else
 public inline int IobufGetc( iobuf_t *iobuf );
 public inline int IobufUngetc( int ch, iobuf_t *iobuf );
-public long IobufFtell( iobuf_t *iobuf );
-public int IobufFseek( iobuf_t *iobuf, long off, int mode );
+public offset_t IobufFtell( iobuf_t *iobuf );
+public int IobufFseeko( iobuf_t *iobuf, offset_t off, int mode );
 public int IobufFeof( iobuf_t *iobuf );
 #endif
 #define IobufPutc( a, b )	putc( a, (b)->iop )

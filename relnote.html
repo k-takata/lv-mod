@@ -11,7 +11,7 @@
 <BODY BGCOLOR=#ffffe0 TEXT=#c00090 LINK=#0090c0 VLINK=#e000a8 ALINK=#00c090>
 
 <P ALIGN=right>
-<FONT SIZE=-2>All rights reserved. Copyright (C) 1996-2004 by NARITA Tomio</FONT>
+<FONT SIZE=-2>All rights reserved. Copyright (C) 1996-2005 by NARITA Tomio</FONT>
 
 <HR>
 
@@ -30,6 +30,14 @@ Back to <A HREF="index.html">LV Homepage</A>.
 <HR WIDTH="50%">
 
 <UL>
+<li> ver 4.51.a (Oct.30th,2005) (Masanori GOTO version)<br>
+	<ul>
+	<li> Add largefile support, now lv can handle over 2GB files on 32 bit architectures that conform to Large File Summit.
+	<li> Use newer autoconf to generate configure.
+	<li> Add --enable-fastio configure option in order to accelerate speed and reduce getc calling overhead on some systems whose stdio functions are procedural, not simple inline expansion.
+	<li> Update copyright date to 2005.
+	<li> Add +num option that is useful for specifying line number like vi style.
+	</ul>
 <li> ver 4.51 (Jan.16th,2004) <br>
 	<ul>
 	<li> fixed keyboard-interrupt handling while reloading a file to avoid segmentation fault.

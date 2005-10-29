@@ -8,7 +8,7 @@
 #ifndef __VERSION_H__
 #define __VERSION_H__
 
-#define VERSION		"v.4.51 (Jan.16th,2004)"
+#define VERSION		"v.4.51.a (Oct.30th,2005)"
 
 public void Banner();
 

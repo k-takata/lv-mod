@@ -30,7 +30,7 @@ public void Banner()
 {
   fprintf( stderr,
 	  "# lv " VERSION "\n"
-	  "# All rights reserved. Copyright (C) 1996-2004 by NARITA Tomio\n"
+	  "# All rights reserved. Copyright (C) 1996-2005 by NARITA Tomio\n"
 	  "# ABSOLUTELY NO WARRANTY; for details type `lv -h'\n"
 	  );
 }

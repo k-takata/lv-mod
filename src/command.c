@@ -709,7 +709,7 @@ private void CommandBottomOfFile( unsigned int arg )
 
 private void CommandPoll( unsigned int arg )
 {
-  long pos;
+  offset_t pos;
 
   kb_interrupted = FALSE;
 

@@ -147,7 +147,7 @@ private boolean_t LineDecode( file_t *f, int page, line_t *line )
  * 行数をキャッシュに格納する.
  */
 
-private void PageLoad( file_t *f, int block, long ptr )
+private void PageLoad( file_t *f, int block, offset_t ptr )
 {
   int i;
 
