@@ -108,6 +108,8 @@ public boolean_t CommandInit()
       (!(editor_program = getenv("EDITOR")))) {
     editor_program = "vi -c %d";
   }
+  editor_program = TokenAlloc(editor_program);
+  filter_program = TokenAlloc("AUTO");
 
   historyIndex = 0;
   for( i = 0 ; i < HISTORY_SIZE ; i++ )
@@ -642,6 +644,8 @@ private void CommandEdit( unsigned int arg )
     if( NULL == (editor_program = getenv( "EDITOR" )) ){
       label = "editor unknown";
       return;
+    } else {
+      editor_program = TokenAlloc(editor_program);
     }
   }
 

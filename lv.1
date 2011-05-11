@@ -19,9 +19,9 @@ lv \- a Powerful Multilingual File Viewer / Grep
 .br
      [-Ss\fIseq\fP] [-Sr\fIseq\fP] [-Sb\fIseq\fP] [-Su\fIseq\fP] [-Sh\fIseq\fP]
 .br
-     [-T\fInumber\fP] [-W\fIwidth\fP] [-H\fIheight\fP] [-E'\fIeditor'\fP] [-+]
+     [-T\fInumber\fP] [-W\fIwidth\fP] [-H\fIheight\fP] [-E'\fIeditor\fP'] [-F'\fIfilter\fP']
 .br
-     [+\fInumber\fP] [+/\fIgrep-pattern\fP]
+     [-+] [+\fInumber\fP] [+/\fIgrep-pattern\fP]
 .br
      [-] (\fIgrep-pattern\fP) [\fIfiles ...\fP]
 .SH DESCRIPTION
@@ -156,6 +156,14 @@ Screen height
 Editor name (default 'vi -c %d')
 .br
 ``%d'' means the line number of current position in a file.
+.IP "-F'<\fIfilter\fP>' (default 'AUTO')"
+Filter name ('AUTO', 'NONE' or any filter command)
+.RS
+.IP "``AUTO''"
+Decompress a file before loading, if the suffix is gz, z, Z, bz2, xz or lzma.
+.IP "``NONE''"
+Load a file without filtering.
+.RE
 .IP "-q"
 Assert there is delete/insert-lines control.
 .br

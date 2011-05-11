@@ -25,6 +25,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #ifdef UNIX
 #include <unistd.h>
@@ -39,10 +40,12 @@
 #include <import.h>
 #include <uty.h>
 #include <begin.h>
+#include <command.h>
 #include "stream.h"
 
 private byte *gz_filter = "zcat";
 private byte *bz2_filter = "bzcat";
+private byte *xz_filter = "xzcat";
 
 private stream_t *StreamAlloc()
 {
@@ -69,19 +72,56 @@ public stream_t *StreamOpen( byte *file )
 
   st = StreamAlloc();
 
-  if( NULL != (exts = Exts( file )) ){
-    if( !strcmp( "gz", exts ) || !strcmp( "GZ", exts )
-	|| !strcmp( "z", exts ) || !strcmp( "Z", exts ) )
-      filter = gz_filter;
-    else if( !strcmp( "bz2", exts ) || !strcmp( "BZ2", exts ) )
-      filter = bz2_filter;
+  if( !strcmp( "AUTO", filter_program ) ){
+    if( NULL != (exts = Exts( file )) ){
+      if( !strcmp( "gz", exts ) || !strcmp( "GZ", exts )
+	  || !strcmp( "z", exts ) || !strcmp( "Z", exts ) )
+	filter = gz_filter;
+      else if( !strcmp( "bz2", exts ) || !strcmp( "BZ2", exts ) )
+	filter = bz2_filter;
+      else if( !strcmp( "xz", exts ) || !strcmp( "XZ", exts )
+	  || !strcmp( "lzma", exts ) || !strcmp( "LZMA", exts ) )
+	filter = xz_filter;
+    }
+  } else if( !strcmp( "NONE", filter_program ) ){
+    filter = NULL;
+  } else {
+    filter = filter_program;
   }
   if( NULL != filter ){
     /*
-     * zcat or bzcat
+     * zcat, bzcat or xzcat
      */
+
+#define COM_SIZE 128
+#define ARG_SIZE 64
+    int argc;
+    byte *ptr, *argv[ ARG_SIZE ];
+    byte com[ COM_SIZE ];
+
     if( NULL == (st->fp = (FILE *)tmpfile()) )
       perror( "temporary file" ), exit( -1 );
+
+    if( strlen( filter ) + 1 > COM_SIZE )
+      errno = E2BIG, perror( filter ), exit( -1 );
+
+    strcpy( com, filter );
+
+    ptr = com;
+    argc = 0;
+    while( 0x00 != *ptr && argc < ARG_SIZE - 2 ){
+      argv[ argc ] = ptr;
+      while( ' ' != *ptr && 0x00 != *ptr )
+	ptr++;
+      if( 0x00 != *ptr ){
+	*ptr++ = 0x00;
+	while( ' ' == *ptr && 0x00 != *ptr )
+	  ptr++;
+      }
+      argc++;
+    }
+    argv[ argc++ ] = file;
+    argv[ argc ] = NULL;
 
 #ifdef MSDOS
     { int sout;
@@ -89,7 +129,7 @@ public stream_t *StreamOpen( byte *file )
       sout = dup( 1 );
       close( 1 );
       dup( fileno( st->fp ) );
-      if( 0 > spawnlp( 0, filter, filter, file, NULL ) )
+      if( 0 > spawnvp( 0, argv[0], argv ) )
 	FatalErrorOccurred();
       close( 1 );
       dup( sout );
@@ -115,7 +155,7 @@ public stream_t *StreamOpen( byte *file )
 	close( fds[ 0 ] );
 	close( 1 );
 	dup( fds[ 1 ] );
-	if( 0 > execlp( filter, filter, file, NULL ) )
+	if( 0 > execvp( argv[0], (char **)argv ) )
 	  perror( filter ), exit( -1 );
 	/*
 	 * never reach here

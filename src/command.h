@@ -11,6 +11,7 @@
 #include <file.h>
 
 public byte *editor_program;
+public byte *filter_program;
 
 public boolean_t initcmd_mode;
 public char *initcmd_str;

@@ -265,6 +265,8 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
       case 'W': conf->width = atoi( s + 1 ); break;
       case 'H': conf->height = atoi( s + 1 ); break;
       case 'E':
+	if( editor_program && ( editor_program[0] != 0x00 ) )
+	  free( editor_program );
 	if( '\'' == *( s + 1 ) ||  '"' == *( s + 1 ) ){
 	  quotationChar = *( s + 1 );
 	  editor_program = TokenAlloc( s + 1 );
@@ -274,6 +276,20 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	} else {
 	  editor_program = Malloc( strlen( s + 1 ) + 1 );
 	  strcpy( editor_program, s + 1 );
+	}
+	break;
+      case 'F':
+	if( filter_program && ( filter_program[0] != 0x00 ) )
+	  free( filter_program );
+	if( '\'' == *( s + 1 ) ||  '"' == *( s + 1 ) ){
+	  quotationChar = *( s + 1 );
+	  filter_program = TokenAlloc( s + 1 );
+	  s += 2;
+	  while( 0x00 != *s && quotationChar != *s )
+	    s++;
+	} else {
+	  filter_program = Malloc( strlen( s + 1 ) + 1 );
+	  strcpy( filter_program, s + 1 );
 	}
 	break;
 #ifndef MSDOS /* IF NOT DEFINED */
