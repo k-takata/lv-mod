@@ -1,0 +1,11 @@
+/build/*
+!/build/README
+
+.*
+*.bak
+*~
+*.swp
+*.orig
+*.rej
+
+!.gitignore
