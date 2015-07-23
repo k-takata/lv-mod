@@ -47,7 +47,7 @@ static int strcmp2( char *str1, char *str2 )
 
 public byte LocaleCodingSystem( char *language )
 {
-#ifdef MSDOS
+#if defined( MSDOS ) || defined( WIN32 )
   strcpy( language, "ja_JP" );
   return SHIFT_JIS;
 #elif !defined(HAVE_LANGINFO_CODESET)

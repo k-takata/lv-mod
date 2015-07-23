@@ -474,9 +474,9 @@ private void CommandQuit( unsigned int arg )
 
 private void CommandShellEscape( unsigned int arg )
 {
-#ifdef MSDOS
+#if defined( MSDOS ) || defined( WIN32 )
   byte *shell;
-#endif /* MSDOS */
+#endif /* MSDOS,WIN32 */
 
   ConsoleShellEscape();
 
@@ -484,14 +484,14 @@ private void CommandShellEscape( unsigned int arg )
   FileRefresh( f );
   IstrFreeAll();
 
-#ifdef MSDOS
+#if defined( MSDOS ) || defined( WIN32 )
   if( shell = getenv( "SHELL" ) )
     spawnlp( 0, shell, shell, NULL );
   else if( shell = getenv( "COMSPEC" ) )
     spawnlp( 0, shell, shell, NULL );
   else
     label = "shell unknown";
-#endif /* MSDOS */
+#endif /* MSDOS,WIN32 */
 
 #ifdef UNIX
   ConsoleSuspend();
@@ -612,9 +612,9 @@ private int CommandLaunchEditor( byte *editor, byte *filename, int line )
   }
 #endif /* NOT */
 
-#ifdef MSDOS
+#if defined( MSDOS ) || defined ( WIN32 )
   return spawnvp( 0, argv[ 0 ], argv );
-#else
+#else /* MSDOS,WIN32 */
   if( 0 == (pid = fork()) ){
     execvp( argv[ 0 ], (char **)argv );
     exit( 1 );
@@ -627,7 +627,7 @@ private int CommandLaunchEditor( byte *editor, byte *filename, int line )
     } while (rv == -1 && errno == EINTR);
     return status;
   }
-#endif /* MSDOS */
+#endif /* MSDOS,WIN32 */
 }
 
 private void CommandEdit( unsigned int arg )

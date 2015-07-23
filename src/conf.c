@@ -20,6 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef WIN32
+#include <windows.h>
+#endif /* WIN32 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,6 +68,15 @@
 
 #define LV_CONF 	"_lv"
 #endif /* MSDOS */
+
+#ifdef WIN32
+#define DEFAULT_OUTPUT_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_KEYBOARD_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_PATHNAME_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_DEFAULT_CODING_SYSTEM	EUC_JAPAN
+
+#define LV_CONF 	"_lv"
+#endif /* WIN32 */
 
 #define BUF_SIZE 	128
 
@@ -453,10 +466,28 @@ public void ConfInit( byte **argv )
       }
     }
     if( i < 0 ) i = 0;
-    helpFile[ i ] = NULL;
+    helpFile[ i ] = '\0';
     strcat( helpFile, LV_HELP );
   }
-#else
+#elif defined( WIN32 )
+  {
+    int i;
+    char exe[MAX_PATH];
+
+    GetModuleFileNameA( NULL, exe, sizeof(exe) );
+    helpFile = Malloc( strlen( exe ) + strlen( LV_HELP ) + 1 );
+    strcpy( helpFile, exe );
+    for( i = strlen( helpFile ) - 1 ; i >= 0 ; i-- ){
+      if( '/' == helpFile[ i ] || '\\' == helpFile[ i ] ){
+	i++;
+	break;
+      }
+    }
+    if( i < 0 ) i = 0;
+    helpFile[ i ] = '\0';
+    strcat( helpFile, LV_HELP );
+  }
+#else /* WIN32 */
   helpFile = Malloc( strlen( LV_HELP_PATH "/" LV_HELP ) + 1 );
   strcpy( helpFile, LV_HELP_PATH "/" LV_HELP );
 #endif /* MSDOS */
