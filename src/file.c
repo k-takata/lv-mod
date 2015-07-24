@@ -269,7 +269,7 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
   if( IobufFseek( &f->fp, ptr, SEEK_SET ) )
     perror( "FileStretch()" ), exit( -1 );
 
-#if !defined( MSDOS ) && !defined( _WIN32 ) /* IF NOT DEFINED */
+#ifndef MSDOS /* IF NOT DEFINED */
   if( NULL != f->sp.iop ){
     while( EOF != (ch = IobufGetc( &f->sp )) ){
       IobufPutc( ch, &f->fp );
@@ -308,12 +308,14 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
 	  return FALSE;
       }
     }
+#ifndef _WIN32
     if( -1 != f->pid && IobufFeof( &f->sp ) ){
       int status;
       wait( &status );
     }
+#endif /* _WIN32 */
   } else {
-#endif /* MSDOS,_WIN32 */
+#endif /* MSDOS */
     while( EOF != (ch = IobufGetc( &f->fp )) ){
       count++;
       if( LF == ch || CR == ch || count == (LOAD_SIZE * LOAD_COUNT) ){
@@ -351,7 +353,7 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
 	  return FALSE;
       }
     }
-#if !defined( MSDOS ) && !defined( _WIN32 ) /* IF NOT DEFINED */
+#ifndef MSDOS /* IF NOT DEFINED */
   }
 #endif /* MSDOS */
 
