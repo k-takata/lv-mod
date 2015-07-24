@@ -40,6 +40,7 @@
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
+#include <windows.h>
 #endif /* _WIN32 */
 
 #include <import.h>
@@ -64,6 +65,49 @@ private stream_t *StreamAlloc()
 
   return st;
 }
+
+#ifdef _WIN32
+/* MSVC's tmpfile() creates a file on a root directory.
+ * It might fail on Windows Vista or later.
+ * Implement our own tmpfile(). */
+private FILE *mytmpfile( void )
+{
+  TCHAR TempFileName[ MAX_PATH ];
+  TCHAR TempPath[ MAX_PATH ];
+  DWORD ret;
+  HANDLE hFile;
+  int fd;
+  FILE *fp;
+
+  ret = GetTempPath( MAX_PATH, TempPath );
+  if( ret > MAX_PATH || ret == 0 )
+    return NULL;
+
+  ret = GetTempFileName( TempPath, TEXT( "lv" ), 0, TempFileName );
+  if( ret == 0 )
+    return NULL;
+
+  hFile = CreateFile( TempFileName, GENERIC_READ | GENERIC_WRITE,
+      0, NULL, CREATE_ALWAYS,
+      FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE, NULL );
+  if( hFile == INVALID_HANDLE_VALUE )
+    return NULL;
+
+  fd = _open_osfhandle( (intptr_t)hFile, 0 );
+  if( fd == -1 ){
+    CloseHandle( hFile );
+    return NULL;
+  }
+
+  fp = _fdopen( fd, "w+b" );
+  if( fp == NULL ){
+    _close( fd );
+    return NULL;
+  }
+  return fp;
+}
+#define tmpfile()   mytmpfile()
+#endif /* _WIN32 */
 
 public stream_t *StreamOpen( byte *file )
 {
