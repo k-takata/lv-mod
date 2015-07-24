@@ -276,6 +276,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	} else {
 	  editor_program = Malloc( strlen( s + 1 ) + 1 );
 	  strcpy( editor_program, s + 1 );
+	  s += strlen( s ) - 1;
 	}
 	break;
       case 'F':
@@ -290,6 +291,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	} else {
 	  filter_program = Malloc( strlen( s + 1 ) + 1 );
 	  strcpy( filter_program, s + 1 );
+	  s += strlen( s ) - 1;
 	}
 	break;
 #ifndef MSDOS /* IF NOT DEFINED */
