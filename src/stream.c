@@ -37,10 +37,10 @@
 #include <dos.h>
 #endif /* MSDOS */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 #include <import.h>
 #include <uty.h>
@@ -128,7 +128,7 @@ public stream_t *StreamOpen( byte *file )
     argv[ argc++ ] = file;
     argv[ argc ] = NULL;
 
-#if defined( MSDOS ) || defined( WIN32 )
+#if defined( MSDOS ) || defined( _WIN32 )
     { int sout;
 
       sout = dup( 1 );
@@ -142,7 +142,7 @@ public stream_t *StreamOpen( byte *file )
 
       return st;
     }
-#endif /* MSDOS,WIN32 */
+#endif /* MSDOS,_WIN32 */
 
 #ifdef UNIX
     { int fds[ 2 ], pid;
@@ -197,7 +197,7 @@ private void StdinDuplicationFailed()
 public stream_t *StreamReconnectStdin()
 {
   stream_t *st;
-#if defined( UNIX ) || defined( WIN32 )
+#if defined( UNIX ) || defined( _WIN32 )
   struct stat sbuf;
 #endif
 
@@ -209,7 +209,7 @@ public stream_t *StreamReconnectStdin()
   close( 0 );
   dup( 1 );
 #endif /* MSDOS */
-#if defined( UNIX ) || defined( WIN32 )
+#if defined( UNIX ) || defined( _WIN32 )
   fstat( 0, &sbuf );
   if( S_IFREG == ( sbuf.st_mode & S_IFMT ) ){
     /* regular */
@@ -225,7 +225,7 @@ public stream_t *StreamReconnectStdin()
   close( 0 );
   if( IsAtty( 1 ) && 0 != open( "/dev/tty", O_RDONLY ) )
     perror( "/dev/tty" ), exit( -1 );
-#endif /* UNIX,WIN32 */
+#endif /* UNIX,_WIN32 */
 
   return st;
 }

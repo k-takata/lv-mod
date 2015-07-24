@@ -66,13 +66,13 @@ public void DisplayFull( file_t *f )
 
   ScreenGetTop( f, seg, blk, off, phy );
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Clearing screen is very slow on Windows. */
   ConsoleSetCur( 0, 0 );
   ConsoleClearRight();
-#else /* WIN32 */
+#else /* _WIN32 */
   ConsoleClearScreen();
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
   for( i = 0 ; i < f->screen.lines ; i++ ){
     LineEncode( f, blk, off, phy );
@@ -80,17 +80,17 @@ public void DisplayFull( file_t *f )
       ConsoleSetCur( 0, i );
     }
     ConsolePrintsStr( encode_str, encode_length );
-#ifdef WIN32
+#ifdef _WIN32
     ConsoleClearRight();
-#endif /* WIN32 */
+#endif /* _WIN32 */
     PositionInc( f, seg, blk, off, phy );
   }
   for( i = f->screen.lines ; i < f->height ; i++ ){
     ConsoleSetCur( 0, i );
     ConsolePrint( '~' );
-#ifdef WIN32
+#ifdef _WIN32
     ConsoleClearRight();
-#endif /* WIN32 */
+#endif /* _WIN32 */
   }
 
   ConsoleOnCur();

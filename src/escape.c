@@ -47,13 +47,13 @@ public boolean_t DecodeEscape( state_t *state )
 
   switch( ch ){
   case '[':
-#ifdef WIN32
+#ifdef _WIN32
     if( TRUE == binary_decode )
       break;
-#else /* WIN32 */
+#else /* _WIN32 */
     if( FALSE == allow_ansi_esc || TRUE == binary_decode )
       break;
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
     /*
      * possibly, ANSI character attribute sequence

@@ -3,17 +3,17 @@
 #   target: all, big5cnsmap, map, rev, clean
 ########################################################################
 
-SHELL = /bin/sh
+SHELL = cmd
 
 ########################################################################
 # You don't have to change the following.
 ########################################################################
 
-# Windows (MinGW)
-CC = gcc
-CFLAGS = -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1 -DHAVE_FSEEKO=1
-LIB = -lkernel32 -lshell32
-O = o
+# Windows (MSVC)
+CC = cl
+CFLAGS = -nologo -MT -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1
+LIBS = kernel32.lib
+O = obj
 
 OBJS=	itable.$(O) ctable.$(O) uty.$(O) istr.$(O) stream.$(O) file.$(O) \
 	guess.$(O) decode.$(O) encode.$(O) escape.$(O) iso2022.$(O) \
@@ -27,9 +27,9 @@ UNIOBJS = utf.$(O) unimap.$(O) unirev.$(O)
 all: lv.exe
 
 lv.exe: $(OBJS) $(UNIOBJS)
-	$(CC) -o $@ $(OBJS) $(UNIOBJS) $(LIB)
+	$(CC) -Fe$@ $(OBJS) $(UNIOBJS) $(LIBS)
 
-.c.$(O):
+.c.$(O)::
 	$(CC) $(CFLAGS) -c $<
 
 big5.$(O): big5.c big5.h decode.h encode.h escape.h uty.h unimap.h
@@ -197,7 +197,4 @@ iso88599.rev:
 #
 
 clean:
-	for file in lv $(OBJS) $(UNIOBJS) consunix.o ; \
-	do \
-		if [ -f $$file ]; then rm $$file ; fi \
-	done
+	-DEL /F /Q lv.exe $(OBJS) $(UNIOBJS)
