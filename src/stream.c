@@ -172,7 +172,7 @@ public stream_t *StreamOpen( byte *file )
     argv[ argc++ ] = file;
     argv[ argc ] = NULL;
 
-#ifdef MSDOS
+#if defined( MSDOS ) || defined( _WIN32 )
     { int sout;
 
       sout = dup( 1 );
@@ -186,18 +186,7 @@ public stream_t *StreamOpen( byte *file )
 
       return st;
     }
-#endif /* MSDOS */
-
-#ifdef _WIN32
-    { char buf[1024];
-
-      sprintf(buf, "%s \"%s\"", filter, file);
-      if( NULL == (st->sp = _popen( buf, "rb" )) )
-	perror( "fdopen" ), exit( -1 );
-
-      return st;
-    }
-#endif /* _WIN32 */
+#endif /* MSDOS,_WIN32 */
 
 #ifdef UNIX
     { int fds[ 2 ], pid;
@@ -265,23 +254,7 @@ public stream_t *StreamReconnectStdin()
   dup( 1 );
 #endif /* MSDOS */
 
-#ifdef _WIN32
-  fstat( 0, &sbuf );
-  if( S_IFREG == ( sbuf.st_mode & S_IFMT ) ){
-    /* regular */
-    if( NULL == (st->fp = fdopen( dup( 0 ), "rb" )) )
-      StdinDuplicationFailed();
-  } else {
-    /* socket */
-    if( NULL == (st->fp = (FILE *)tmpfile()) )
-      perror( "temporary file" ), exit( -1 );
-    if( NULL == (st->sp = fdopen( dup( 0 ), "rb" )) )
-      StdinDuplicationFailed();
-  }
-  close( 0 );
-#endif /* _WIN32 */
-
-#ifdef UNIX
+#if defined( UNIX ) || defined( _WIN32 )
   fstat( 0, &sbuf );
   if( S_IFREG == ( sbuf.st_mode & S_IFMT ) ){
     /* regular */
@@ -295,9 +268,11 @@ public stream_t *StreamReconnectStdin()
       StdinDuplicationFailed();
   }
   close( 0 );
+#ifndef _WIN32
   if( IsAtty( 1 ) && 0 != open( "/dev/tty", O_RDONLY ) )
     perror( "/dev/tty" ), exit( -1 );
-#endif /* UNIX */
+#endif /* WIN32 */
+#endif /* UNIX,_WIN32 */
 
   return st;
 }
@@ -306,7 +281,7 @@ public boolean_t StreamClose( stream_t *st )
 {
   fclose( st->fp );
   if( st->sp )
-    fclose( st->sp ); // FIXME: Use _pclose if sp is opened by _popen.
+    fclose( st->sp );
 
   free( st );
 
