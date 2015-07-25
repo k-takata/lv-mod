@@ -229,7 +229,7 @@ public boolean_t StreamClose( stream_t *st )
 {
   fclose( st->fp );
   if( st->sp )
-    fclose( st->fp );
+    fclose( st->sp );
 
   free( st );
 
