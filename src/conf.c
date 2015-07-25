@@ -70,10 +70,17 @@
 #endif /* MSDOS */
 
 #ifdef _WIN32
+#ifdef USE_UNICODE_IO
+#define DEFAULT_OUTPUT_CODING_SYSTEM	UTF_8
+#define DEFAULT_KEYBOARD_CODING_SYSTEM	UTF_8
+#define DEFAULT_PATHNAME_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_DEFAULT_CODING_SYSTEM	UTF_8
+#else /* USE_UNICODE_IO */
 #define DEFAULT_OUTPUT_CODING_SYSTEM	SHIFT_JIS
 #define DEFAULT_KEYBOARD_CODING_SYSTEM	SHIFT_JIS
 #define DEFAULT_PATHNAME_CODING_SYSTEM	SHIFT_JIS
-#define DEFAULT_DEFAULT_CODING_SYSTEM	EUC_JAPAN
+#define DEFAULT_DEFAULT_CODING_SYSTEM	SHIFT_JIS
+#endif /* USE_UNICODE_IO */
 
 #define LV_CONF 	"_lv"
 #endif /* _WIN32 */
@@ -106,7 +113,7 @@ private void ConfInitArgs( conf_t *conf )
   conf->height	= -1;
   conf->options	= TRUE;
   conf->inputCodingSystem	= DEFAULT_INPUT_CODING_SYSTEM;
-#ifdef HAVE_SETLOCALE
+#if defined( HAVE_SETLOCALE ) && !defined( USE_UNICODE_IO )
   if (use_locale) {
     conf->keyboardCodingSystem	= localeCodingSystem;
     conf->outputCodingSystem	= localeCodingSystem;

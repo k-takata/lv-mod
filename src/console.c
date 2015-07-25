@@ -575,31 +575,51 @@ public int ConsoleGetChar()
 #endif /* MSDOS */
 
 #ifdef _WIN32
-  int ch;
+  static byte u8buf[ 4 ];
+  static int inindex = 0;
+  static int outindex = 0;
+  WCHAR buf[ 2 ];
+  int ch, cnt;
 
-  ch = getch();
-  if ( 0xe0 != ch && 0x00 != ch )
-    return ch;
+  if( outindex < inindex )
+    return u8buf[ outindex++ ];
 
-  /* Extended keys or function keys */
-  ch = getch();
-  switch( ch ){
-  case 0x49: /* PageUp */
-    return STX; /* C-b */
-  case 0x51: /* PageDown */
-    return ACK; /* C-f */
-  case 0x53: /* Del */
-    return DEL;
-  case 0x47: /* Home */
-  case 0x4f: /* End */
-  case 0x52: /* Ins */
-    return 0; /* ignore */
-  default:
-    if( 0x3b <= ch && ch <= 0x44 )  /* F1..F10 */
-      return 0; /* ignore */
-    break;
+  cnt = 0;
+  buf[ cnt++ ] = ch = _getwch();
+  if( 0xe0 == ch || 0x00 == ch ){
+    /* Extended keys or function keys */
+    ch = _getwch();
+    switch( ch ){
+      case 0x49: /* PageUp */
+	return STX; /* C-b */
+      case 0x51: /* PageDown */
+	return ACK; /* C-f */
+      case 0x53: /* Del */
+	return DEL;
+      case 0x47: /* Home */
+      case 0x4f: /* End */
+      case 0x52: /* Ins */
+	return 0; /* ignore */
+      default:
+	if( 0x3b <= ch && ch <= 0x44 )  /* F1..F10 */
+	  return 0; /* ignore */
+	return ch;
+    }
   }
-  return ch;
+  if( IS_HIGH_SURROGATE( ch ) )
+    buf[ cnt++ ] = _getwch();
+
+#ifdef USE_UNICODE_IO
+  inindex = WideCharToMultiByte( CP_UTF8, 0, buf, cnt, u8buf,
+      sizeof( u8buf ), NULL, NULL );
+#else /* USE_UNICODE_IO */
+  inindex = WideCharToMultiByte( CP_ACP, 0, buf, cnt, u8buf,
+      sizeof( u8buf ), NULL, NULL );
+#endif /* USE_UNICODE_IO */
+  if( 0 == inindex )
+    return 0;
+  outindex = 0;
+  return u8buf[ outindex++ ];
 #endif /* _WIN32 */
 
 #ifdef UNIX
@@ -633,9 +653,35 @@ public int ConsolePrint( byte c )
 #endif /* MSDOS */
 
 #ifdef _WIN32
+#ifdef USE_UNICODE_IO
+  static byte buf[ 5 ];
+  static int index = 0;
+  static int len = 0;
+
+  if( 0 == len ){
+    index = 0;
+    if( (c & 0x80) == 0x00 )
+      len = 1;
+    else if( (c & 0xe0) == 0xc0 )
+      len = 2;
+    else if( (c & 0xf0) == 0xe0 )
+      len = 3;
+    else if( (c & 0xf8) == 0xf0 )
+      len = 4;
+    else
+      len = 1;
+  }
+  buf[ index++ ] = c;
+  if( index == len ){
+    buf[ index ] = '\0';
+    ConsolePrints( buf );
+    len = 0;
+  }
+  return c;
+#else /* USE_UNICODE_IO */
   DWORD written;
   WriteFile( console_handle, &c, 1, &written, NULL );
-  return c;
+#endif /* USE_UNICODE_IO */
 #endif /* _WIN32 */
 
 #ifdef UNIX
@@ -645,8 +691,25 @@ public int ConsolePrint( byte c )
 
 public void ConsolePrints( byte *str )
 {
+#if defined( _WIN32 ) && defined( USE_UNICODE_IO )
+  int size, ret;
+  LPWSTR buf;
+  DWORD written;
+
+  size = MultiByteToWideChar( CP_UTF8, 0, str, -1, NULL, 0 );
+  if( 0 == size )
+    return;
+  buf = ( LPWSTR )Malloc( size * sizeof( WCHAR ) );
+  if( NULL == buf )
+    return;
+  ret = MultiByteToWideChar( CP_UTF8, 0, str, -1, buf, size );
+  if( ret > 1 )
+    WriteConsoleW( console_handle, buf, ret - 1, &written, NULL );
+  free( buf );
+#else /* _WIN32,USE_UNICODE_IO */
   while( *str )
     ConsolePrint( *str++ );
+#endif /* _WIN32,USE_UNICODE_IO */
 }
 
 public void ConsolePrintsStr( str_t *str, int length )
