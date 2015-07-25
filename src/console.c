@@ -282,7 +282,7 @@ public void ConsoleTermInit()
    * 3. initialize terminal status
    */
 
-#if defined( MSDOS ) || defined( _WIN32 )
+#ifdef MSDOS
   byte *ptr;
 
 #define ANSI		0
@@ -320,9 +320,16 @@ public void ConsoleTermInit()
   cur_down		= "\x1bP";
   cur_ppage		= "\x1bI";
   cur_npage		= "\x1bQ";
+#endif /* MSDOS */
 
+#ifdef _WIN32
   no_scroll		= FALSE;
-#endif /* MSDOS,_WIN32 */
+
+  console_handle = CreateConsoleScreenBuffer(
+      GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+      NULL, CONSOLE_TEXTMODE_BUFFER, NULL );
+  ConsoleGetWindowSize();
+#endif /* _WIN32 */
 
 #ifdef TERMCAP
   byte *term, *ptr;
@@ -427,9 +434,7 @@ public void ConsoleSetUp()
   SMALL_RECT rect;
   COORD coord;
   DWORD mode, written;
-  console_handle = CreateConsoleScreenBuffer(
-		  GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-		  NULL, CONSOLE_TEXTMODE_BUFFER, NULL );
+
   GetConsoleScreenBufferInfo( console_handle, &csbi );
   console_attr = csbi.wAttributes;
   rect = csbi.srWindow;
