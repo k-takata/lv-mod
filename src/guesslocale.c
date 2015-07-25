@@ -20,8 +20,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifdef HAVE_SETLOCALE
-
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
@@ -33,6 +31,8 @@
 #include <ctable.h>
 #include <begin.h>
 #include <guesslocale.h>
+
+#ifdef HAVE_SETLOCALE
 
 static int strcmp2( char *str1, char *str2 )
 {
@@ -103,6 +103,8 @@ public byte LocaleCodingSystem( char *language )
 #endif
 }
 
+#endif /* HAVE_SETLOCALE */
+
 public byte DetermineEUC( char *language, char defaultEuc )
 {
   if( EUC_JAPAN == defaultEuc || EUC_KOREA == defaultEuc ||
@@ -116,6 +118,8 @@ public byte DetermineEUC( char *language, char defaultEuc )
   if( !strncmp(language, "zh", 2) ) return EUC_TAIWAN;
   return EUC_JAPAN;
 }
+
+#ifdef HAVE_SETLOCALE
 
 public byte Determine8bit( char *language )
 {
