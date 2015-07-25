@@ -269,7 +269,7 @@ private boolean_t FindContinue( file_t *f, position_t *pos, boolean_t forward )
       str = FileLoadLine( f, &idx, &simple );
       if( 0 == idx )
 	return FALSE;
-      
+
       if( TRUE == simple )
 	istr = DecodeSimple( IstrAlloc( ZONE_FREE, idx + 1 ),
 			    str, &idx );
