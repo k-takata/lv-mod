@@ -9,3 +9,4 @@
 *.rej
 
 !.gitignore
+!.editorconfig

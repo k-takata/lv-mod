@@ -1,0 +1,13 @@
+; see: http://editorconfig.org/
+
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[**.[ch]]
+indent_style = tab
+indent_size = 2
+tab_width = 8
