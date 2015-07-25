@@ -460,7 +460,7 @@ public void ConsoleSetUp()
 #else
 # ifdef SIGWINCH
   signal( SIGWINCH, WindowChangeHandler );
-# endif 
+# endif
   signal( SIGINT, InterruptHandler );
 #endif /* HAVE_SIGVEC */
 
@@ -476,9 +476,9 @@ public void ConsoleSetUp()
   ttyNew.c_lflag &= ~ICANON;
   ttyNew.c_lflag &= ~ECHO;
   ttyNew.c_lflag &= ~IEXTEN;
-#ifdef VDISCRD /* IBM AIX */ 
-#define VDISCARD VDISCRD 
-#endif 
+#ifdef VDISCRD /* IBM AIX */
+#define VDISCARD VDISCRD
+#endif
   ttyNew.c_cc[ VDISCARD ] = -1;
   ttyNew.c_cc[ VMIN ] = 1;
   ttyNew.c_cc[ VTIME ] = 0;
@@ -548,7 +548,7 @@ public void ConsoleReturnToProgram()
     tputs( enter_ca_mode, 1, putfunc );
 
 #ifdef UNIX
-#ifdef HAVE_TERMIOS_H 
+#ifdef HAVE_TERMIOS_H
   tcsetattr( 0, TCSADRAIN, &ttyNew );
 #else
   ioctl( 0, TIOCSETN, &ttyNew );

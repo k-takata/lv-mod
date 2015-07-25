@@ -13,3 +13,4 @@
 *.exe
 
 !.gitignore
+!.editorconfig
