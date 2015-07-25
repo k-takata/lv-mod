@@ -565,9 +565,37 @@ public void ConsoleSuspend()
 
 public int ConsoleGetChar()
 {
-#if defined(MSDOS) || defined(_WIN32)
+#ifdef MSDOS
   return getch();
-#endif /* MSDOS,_WIN32 */
+#endif /* MSDOS */
+
+#ifdef _WIN32
+  int ch;
+
+  ch = getch();
+  if ( 0xe0 != ch && 0x00 != ch )
+    return ch;
+
+  /* Extended keys or function keys */
+  ch = getch();
+  switch( ch ){
+  case 0x49: /* PageUp */
+    return STX; /* C-b */
+  case 0x51: /* PageDown */
+    return ACK; /* C-f */
+  case 0x53: /* Del */
+    return DEL;
+  case 0x47: /* Home */
+  case 0x4f: /* End */
+  case 0x52: /* Ins */
+    return 0; /* ignore */
+  default:
+    if( 0x3b <= ch && ch <= 0x44 )  /* F1..F10 */
+      return 0; /* ignore */
+    break;
+  }
+  return ch;
+#endif /* _WIN32 */
 
 #ifdef UNIX
   byte buf;
