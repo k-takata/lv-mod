@@ -11,9 +11,17 @@ SHELL = cmd
 
 # Windows (MSVC)
 CC = cl
-CFLAGS = -nologo -MT -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1
+CFLAGS = -nologo -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1
+LDFLAGS = -nologo
 LIBS = kernel32.lib
 O = obj
+
+!ifdef DEBUG
+CFLAGS = $(CFLAGS) -MTd -Zi
+LDFLAGS = $(LDFLAGS) -Zi
+!else
+CFLAGS = $(CFLAGS) -MT
+!endif
 
 OBJS=	itable.$(O) ctable.$(O) uty.$(O) istr.$(O) stream.$(O) file.$(O) \
 	guess.$(O) decode.$(O) encode.$(O) escape.$(O) iso2022.$(O) \
@@ -27,7 +35,7 @@ UNIOBJS = utf.$(O) unimap.$(O) unirev.$(O)
 all: lv.exe
 
 lv.exe: $(OBJS) $(UNIOBJS)
-	$(CC) -Fe$@ $(OBJS) $(UNIOBJS) $(LIBS)
+	$(CC) -Fe$@ $(OBJS) $(UNIOBJS) $(LIBS) $(LDFLAGS)
 
 .c.$(O)::
 	$(CC) $(CFLAGS) -c $<
