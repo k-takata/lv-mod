@@ -85,7 +85,13 @@
 #define LV_CONF 	"_lv"
 #endif /* _WIN32 */
 
+#ifdef PATH_MAX
+#define BUF_SIZE	( PATH_MAX + 1 )
+#elif defined( _MAX_PATH )
+#define BUF_SIZE	_MAX_PATH
+#else
 #define BUF_SIZE 	128
+#endif
 
 #define LV_HELP		"lv.hlp"
 /*#define LV_HELP_PATH	"/usr/local/lib/lv/"*/ /* now defined through make */
