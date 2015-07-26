@@ -143,6 +143,15 @@ public byte *TokenAlloc( byte *s )
   return token;
 }
 
+public byte *Strdup( byte *s )
+{
+  byte *p;
+
+  p = Malloc( strlen( s ) + 1 );
+  strcpy( p, s );
+  return p;
+}
+
 #ifdef MSDOS
 public void far *FarMalloc( unsigned int size )
 {

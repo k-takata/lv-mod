@@ -300,8 +300,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	  while( 0x00 != *s && quotationChar != *s )
 	    s++;
 	} else {
-	  editor_program = Malloc( strlen( s + 1 ) + 1 );
-	  strcpy( editor_program, s + 1 );
+	  editor_program = Strdup( s + 1 );
 	  s += strlen( s ) - 1;
 	}
 	break;
@@ -315,8 +314,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	  while( 0x00 != *s && quotationChar != *s )
 	    s++;
 	} else {
-	  filter_program = Malloc( strlen( s + 1 ) + 1 );
-	  strcpy( filter_program, s + 1 );
+	  filter_program = Strdup( s + 1 );
 	  s += strlen( s ) - 1;
 	}
 	break;
