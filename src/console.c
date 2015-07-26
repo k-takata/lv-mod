@@ -114,6 +114,7 @@ private WORD console_attr = 0;
 private HANDLE stdout_handle = NULL;
 private HANDLE console_handle = NULL;
 private DWORD initial_mode;
+private DWORD new_mode;
 #endif /* _WIN32 */
 
 #ifdef UNIX
@@ -433,7 +434,7 @@ public void ConsoleSetUp()
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   SMALL_RECT rect;
   COORD coord;
-  DWORD mode, written;
+  DWORD written;
 
   GetConsoleScreenBufferInfo( console_handle, &csbi );
   console_attr = csbi.wAttributes;
@@ -442,11 +443,9 @@ public void ConsoleSetUp()
   coord.Y = rect.Bottom - rect.Top;
   SetConsoleScreenBufferSize( console_handle, coord );
   GetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), &initial_mode );
-  mode = initial_mode;
-  mode &= ~ENABLE_LINE_INPUT;
-  mode &= ~ENABLE_ECHO_INPUT;
-  mode &= ~ENABLE_PROCESSED_INPUT;
-  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), mode );
+  new_mode = initial_mode &
+    ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT );
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), new_mode );
   SetConsoleActiveScreenBuffer( console_handle );
 #endif /* _WIN32 */
 
@@ -535,22 +534,32 @@ public void ConsoleShellEscape()
 #endif /* HAVE_TERMIOS_H */
 #endif /* UNIX */
 
+#ifdef _WIN32
+  SetConsoleActiveScreenBuffer( GetStdHandle( STD_OUTPUT_HANDLE ) );
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), initial_mode );
+#else /* _WIN32 */
   if( keypad_local )
     tputs( keypad_local, 1, putfunc );
   if( exit_ca_mode )
     tputs( exit_ca_mode, 1, putfunc );
   else
     ConsoleSetCur( 0, HEIGHT - 1 );
+#endif /* _WIN32 */
 
   ConsoleFlush();
 }
 
 public void ConsoleReturnToProgram()
 {
+#ifdef _WIN32
+  SetConsoleActiveScreenBuffer( console_handle );
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), new_mode );
+#else /* _WIN32 */
   if( keypad_xmit )
     tputs( keypad_xmit, 1, putfunc );
   if( enter_ca_mode )
     tputs( enter_ca_mode, 1, putfunc );
+#endif /* _WIN32 */
 
 #ifdef UNIX
 #ifdef HAVE_TERMIOS_H
