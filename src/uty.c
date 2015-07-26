@@ -133,7 +133,7 @@ public byte *TokenAlloc( byte *s )
     }
   }
   if( i == TOKEN_LENGTH )
-    return "";
+    return Strdup("");
 
   token = (byte *)Malloc( i + 1 );
   for( j = 0 ; j < i ; j++ )

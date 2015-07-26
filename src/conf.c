@@ -291,7 +291,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
       case 'W': conf->width = atoi( s + 1 ); break;
       case 'H': conf->height = atoi( s + 1 ); break;
       case 'E':
-	if( editor_program && ( editor_program[0] != 0x00 ) )
+	if( editor_program )
 	  free( editor_program );
 	if( '\'' == *( s + 1 ) ||  '"' == *( s + 1 ) ){
 	  quotationChar = *( s + 1 );
@@ -305,7 +305,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	}
 	break;
       case 'F':
-	if( filter_program && ( filter_program[0] != 0x00 ) )
+	if( filter_program )
 	  free( filter_program );
 	if( '\'' == *( s + 1 ) ||  '"' == *( s + 1 ) ){
 	  quotationChar = *( s + 1 );
