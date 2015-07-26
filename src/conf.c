@@ -442,6 +442,15 @@ public void Conf( conf_t *conf, byte **argv )
     strcat( buf, "/" LV_CONF );
     ConfFile( conf, buf );
   }
+#ifdef _WIN32
+  else if( NULL != (ptr = getenv( "USERPROFILE" )) ){
+    strcpy( buf, ptr );
+    strcat( buf, "/" LV_CONF );
+    ConfFile( conf, buf );
+  } else {
+    ConfFile( conf, LV_CONF );
+  }
+#endif /* _WIN32 */
 
 #ifdef MSDOS
   ConfFile( conf, LV_CONF );
