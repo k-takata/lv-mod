@@ -109,6 +109,54 @@ private FILE *mytmpfile( void )
 #define tmpfile()   mytmpfile()
 #endif /* _WIN32 */
 
+private int CreateArgv( byte *filter, byte *file, byte ***pargv )
+{
+  int argc, i;
+  byte **argv;
+  byte *s;
+  byte quotationChar = 0;
+
+  s = filter;
+  for( i = 0; s = strpbrk( s, " \t" ); i++, s++ )
+    ;
+  argv = Malloc( sizeof( byte * ) * ( i + 3 ) );
+  argc = 0;
+  s = filter;
+  while( 0x00 != *s ){
+    if( '\'' == *s || '"' == *s ){
+      quotationChar = *s;
+      argv[ argc ] = TokenAlloc( s );
+      s++;
+      while( 0x00 != *s && quotationChar != *s )
+	s++;
+    } else {
+      argv[ argc ] = TokenAlloc( s );
+      s++;
+      while( 0x00 != *s && ' ' != *s && '\t' != *s )
+	s++;
+    }
+    if( 0x00 != *s )
+      s++;
+    argc++;
+  }
+  argv[ argc++ ] = Strdup( file );
+  argv[ argc ] = NULL;
+
+  *pargv = argv;
+  return argc;
+}
+
+private void DestroyArgv( byte **argv )
+{
+  int i;
+
+  if( NULL == argv )
+    return;
+  for( i = 0; NULL != argv[ i ]; i++ )
+    free( argv[ i ] );
+  free( argv );
+}
+
 public stream_t *StreamOpen( byte *file )
 {
   stream_t *st;
@@ -141,36 +189,12 @@ public stream_t *StreamOpen( byte *file )
     /*
      * zcat, bzcat or xzcat
      */
-
-#define COM_SIZE 128
-#define ARG_SIZE 64
-    int argc;
-    byte *ptr, *argv[ ARG_SIZE ];
-    byte com[ COM_SIZE ];
+    byte **argv;
 
     if( NULL == (st->fp = (FILE *)tmpfile()) )
       perror( "temporary file" ), exit( -1 );
 
-    if( strlen( filter ) + 1 > COM_SIZE )
-      errno = E2BIG, perror( filter ), exit( -1 );
-
-    strcpy( com, filter );
-
-    ptr = com;
-    argc = 0;
-    while( 0x00 != *ptr && argc < ARG_SIZE - 2 ){
-      argv[ argc ] = ptr;
-      while( ' ' != *ptr && 0x00 != *ptr )
-	ptr++;
-      if( 0x00 != *ptr ){
-	*ptr++ = 0x00;
-	while( ' ' == *ptr && 0x00 != *ptr )
-	  ptr++;
-      }
-      argc++;
-    }
-    argv[ argc++ ] = file;
-    argv[ argc ] = NULL;
+    CreateArgv( filter, file, &argv );
 
 #if defined( MSDOS ) || defined( _WIN32 )
     { int sout;
@@ -184,6 +208,7 @@ public stream_t *StreamOpen( byte *file )
       dup( sout );
       rewind( st->fp );
 
+      DestroyArgv( argv );
       return st;
     }
 #endif /* MSDOS,_WIN32 */
@@ -218,6 +243,7 @@ public stream_t *StreamOpen( byte *file )
 	if( NULL == (st->sp = fdopen( fds[ 0 ], "r" )) )
 	  perror( "fdopen" ), exit( -1 );
 
+	DestroyArgv( argv );
 	return st;
       }
     }
