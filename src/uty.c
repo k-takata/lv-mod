@@ -99,7 +99,13 @@ public void *Malloc( unsigned int size )
   return ptr;
 }
 
-#define TOKEN_LENGTH	32
+#ifdef PATH_MAX
+#define TOKEN_LENGTH	( PATH_MAX + 1 )
+#elif defined( _MAX_PATH )
+#define TOKEN_LENGTH	_MAX_PATH
+#else
+#define TOKEN_LENGTH 	32
+#endif
 
 public byte *TokenAlloc( byte *s )
 {
