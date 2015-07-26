@@ -162,6 +162,53 @@ private char *keypad_local		= NULL;
 private char *keypad_xmit		= NULL;
 #endif /* TERMCAP */
 
+#ifdef _WIN32
+private WORD GetWin32Attribute( byte attr )
+{
+  WORD attr_new = FOREGROUND_WHITE;
+  if( ATTR_STANDOUT & attr ){
+    attr_new =
+      ((attr_new & FOREGROUND_MASK) << 4) |
+      ((attr_new & BACKGROUND_MASK) >> 4);
+  } else if( ATTR_COLOR & attr ){
+    if( ATTR_REVERSE & attr ){
+      if( ATTR_COLOR_B & attr ){
+	attr_new = (attr_new & BACKGROUND_MASK)
+	  | FOREGROUND_INTENSITY;
+	if((ATTR_COLOR & attr) & 1) attr_new |= BACKGROUND_RED;
+	if((ATTR_COLOR & attr) & 2) attr_new |= BACKGROUND_GREEN;
+	if((ATTR_COLOR & attr) & 4) attr_new |= BACKGROUND_BLUE;
+      } else {
+	attr_new = (attr_new & BACKGROUND_MASK)
+	  | FOREGROUND_INTENSITY | FOREGROUND_WHITE;
+	if((ATTR_COLOR & attr) & 1) attr_new |= BACKGROUND_RED;
+	if((ATTR_COLOR & attr) & 2) attr_new |= BACKGROUND_GREEN;
+	if((ATTR_COLOR & attr) & 4) attr_new |= BACKGROUND_BLUE;
+      }
+    } else {
+      attr_new = (attr_new & BACKGROUND_MASK);
+      if((ATTR_COLOR & attr) & 1) attr_new |= FOREGROUND_RED;
+      if((ATTR_COLOR & attr) & 2) attr_new |= FOREGROUND_GREEN;
+      if((ATTR_COLOR & attr) & 4) attr_new |= FOREGROUND_BLUE;
+    }
+  } else if( ATTR_REVERSE & attr ){
+    attr_new =
+      ((attr_new & FOREGROUND_MASK) << 4) |
+      ((attr_new & BACKGROUND_MASK) >> 4);
+  }
+  if( ATTR_BLINK & attr ){
+    attr_new |= FOREGROUND_INTENSITY;
+  }
+  if( ATTR_UNDERLINE & attr ){
+    attr_new |= FOREGROUND_INTENSITY;
+  }
+  if( ATTR_HILIGHT & attr ){
+    attr_new |= FOREGROUND_INTENSITY;
+  }
+  return attr_new;
+}
+#endif /* _WIN32 */
+
 public void ConsoleInit()
 {
   allow_interrupt	= FALSE;
@@ -894,6 +941,10 @@ private byte prevAttr = 0;
 
 public void ConsoleSetAttribute( byte attr )
 {
+#ifdef _WIN32
+  SetConsoleTextAttribute( console_handle, GetWin32Attribute( attr ) );
+  prevAttr = attr;
+#else /* _WIN32 */
 #ifndef MSDOS /* IF NOT DEFINED */
   if( TRUE == allow_ansi_esc ){
 #endif /* MSDOS */
@@ -935,53 +986,6 @@ public void ConsoleSetAttribute( byte attr )
     ConsolePrint( 'm' );
 #ifndef MSDOS /* IF NOT DEFINED */
   } else {
-#ifdef _WIN32
-    /*
-     * non ansi sequence
-     */
-    WORD attr_new = FOREGROUND_WHITE;
-    if( ATTR_STANDOUT & attr ){
-      attr_new =
-	((attr_new & FOREGROUND_MASK) << 4) |
-	((attr_new & BACKGROUND_MASK) >> 4);
-    } else if( ATTR_COLOR & attr ){
-      if( ATTR_REVERSE & attr ){
-	if( ATTR_COLOR_B & attr ){
-	  attr_new = (attr_new & BACKGROUND_MASK)
-	    | FOREGROUND_INTENSITY;
-		;
-	  if((ATTR_COLOR & attr) & 1) attr_new |= BACKGROUND_RED;
-	  if((ATTR_COLOR & attr) & 2) attr_new |= BACKGROUND_GREEN;
-	  if((ATTR_COLOR & attr) & 4) attr_new |= BACKGROUND_BLUE;
-	} else {
-	  attr_new = (attr_new & BACKGROUND_MASK)
-	    | FOREGROUND_INTENSITY | FOREGROUND_WHITE;
-	  if((ATTR_COLOR & attr) & 1) attr_new |= BACKGROUND_RED;
-	  if((ATTR_COLOR & attr) & 2) attr_new |= BACKGROUND_GREEN;
-	  if((ATTR_COLOR & attr) & 4) attr_new |= BACKGROUND_BLUE;
-	}
-      } else {
-	  attr_new = (attr_new & BACKGROUND_MASK);
-	  if((ATTR_COLOR & attr) & 1) attr_new |= FOREGROUND_RED;
-	  if((ATTR_COLOR & attr) & 2) attr_new |= FOREGROUND_GREEN;
-	  if((ATTR_COLOR & attr) & 4) attr_new |= FOREGROUND_BLUE;
-      }
-    } else if( ATTR_REVERSE & attr ){
-      attr_new =
-	((attr_new & FOREGROUND_MASK) << 4) |
-	((attr_new & BACKGROUND_MASK) >> 4);
-    }
-    if( ATTR_BLINK & attr ){
-      attr_new |= FOREGROUND_INTENSITY;
-    }
-    if( ATTR_UNDERLINE & attr ){
-      attr_new |= FOREGROUND_INTENSITY;
-    }
-    if( ATTR_HILIGHT & attr ){
-      attr_new |= FOREGROUND_INTENSITY;
-    }
-    SetConsoleTextAttribute( console_handle, attr_new );
-#else /* _WIN32 */
     /*
      * non ansi sequence
      */
@@ -1004,8 +1008,8 @@ public void ConsoleSetAttribute( byte attr )
     if( ATTR_STANDOUT & attr )
       if( enter_standout_mode )
 	tputs( enter_standout_mode, 1, putfunc );
-#endif /* _WIN32 */
   }
   prevAttr = attr;
 #endif /* MSDOS */
+#endif /* _WIN32 */
 }
