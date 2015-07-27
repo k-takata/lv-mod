@@ -303,9 +303,15 @@ public void ConsoleGetWindowSize()
 #ifdef _WIN32
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   SMALL_RECT rect;
+  int width, height;
   GetConsoleScreenBufferInfo( console_handle, &csbi );
-  WIDTH = csbi.dwSize.X;
-  HEIGHT = csbi.dwSize.Y - 1;
+  width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  height = csbi.srWindow.Bottom - csbi.srWindow.Top;
+  if( width != WIDTH || height != HEIGHT ){
+    window_changed = TRUE;
+    WIDTH = width;
+    HEIGHT = height;
+  }
 #endif /* _WIN32 */
 }
 
@@ -486,8 +492,7 @@ public void ConsoleSetUp()
   GetConsoleScreenBufferInfo( console_handle, &csbi );
   console_attr = csbi.wAttributes;
   rect = csbi.srWindow;
-  coord.X = rect.Right - rect.Left;
-  coord.Y = rect.Bottom - rect.Top;
+  coord = GetLargestConsoleWindowSize( console_handle );
   SetConsoleScreenBufferSize( console_handle, coord );
   GetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), &initial_mode );
   new_mode = initial_mode &
@@ -642,6 +647,9 @@ public int ConsoleGetChar()
 
   cnt = 0;
   buf[ cnt++ ] = ch = _getwch();
+
+  ConsoleGetWindowSize();
+
   if( 0xe0 == ch || 0x00 == ch ){
     /* Extended keys or function keys */
     ch = _getwch();
@@ -897,15 +905,14 @@ public void ConsoleScrollUp()
   CHAR_INFO ci;
   COORD coord;
   GetConsoleScreenBufferInfo( console_handle, &csbi );
-  rect.Top = csbi.dwCursorPosition.Y;
-  rect.Bottom = csbi.srWindow.Bottom - 1;
-  rect.Left = 0;
-  rect.Right = csbi.dwSize.X - 1;
+  rect = csbi.srWindow;
+  rect.Top = 1;
   coord.X = 0;
-  coord.Y = rect.Top - 1;
+  coord.Y = 0;
   ci.Char.AsciiChar = ' ';
   ci.Attributes = csbi.wAttributes;
-  ScrollConsoleScreenBuffer( console_handle, &rect, &rect, coord, &ci );
+  ScrollConsoleScreenBuffer( console_handle, &rect, &csbi.srWindow,
+      coord, &ci );
   SetConsoleCursorPosition( console_handle, csbi.dwCursorPosition );
 #else /* _WIN32 */
   if( delete_line )
@@ -921,15 +928,13 @@ public void ConsoleScrollDown()
   CHAR_INFO ci;
   COORD coord;
   GetConsoleScreenBufferInfo( console_handle, &csbi );
-  rect.Top = csbi.dwCursorPosition.Y;
-  rect.Bottom = csbi.srWindow.Bottom - 1;
-  rect.Left = 0;
-  rect.Right = csbi.dwSize.X - 1;
+  rect = csbi.srWindow;
   coord.X = 0;
-  coord.Y = rect.Top + 1;
+  coord.Y = 1;
   ci.Char.AsciiChar = ' ';
   ci.Attributes = csbi.wAttributes;
-  ScrollConsoleScreenBuffer( console_handle, &rect, &rect, coord, &ci );
+  ScrollConsoleScreenBuffer( console_handle, &rect, &csbi.srWindow,
+      coord, &ci );
   SetConsoleCursorPosition( console_handle, csbi.dwCursorPosition );
 #else /* _WIN32 */
   if( insert_line )
