@@ -13,6 +13,8 @@
 *.exe
 *.pdb
 
+autom4te.cache
+
 !.gitignore
 !.editorconfig
 
