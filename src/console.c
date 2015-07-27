@@ -158,9 +158,9 @@ private RETSIGTYPE InterruptHandler( int arg )
 {
   kb_interrupted = TRUE;
 
-#ifndef HAVE_SIGVEC
+#ifndef HAVE_SIGACTION
   signal( SIGINT, InterruptHandler );
-#endif /* HAVE_SIGVEC */
+#endif /* HAVE_SIGACTION */
 }
 
 public void ConsoleEnableInterrupt()
@@ -235,9 +235,9 @@ private RETSIGTYPE WindowChangeHandler( int arg )
 
   ConsoleGetWindowSize();
 
-#ifndef HAVE_SIGVEC
+#ifndef HAVE_SIGACTION
   signal( SIGWINCH, WindowChangeHandler );
-#endif /* HAVE_SIGVEC */
+#endif /* HAVE_SIGACTION */
 }
 #endif /* UNIX */
 
@@ -388,24 +388,24 @@ public void ConsoleSetUp()
   signal( SIGINT, InterruptIgnoreHandler );
 #endif /* MSDOS */
 
-#ifdef HAVE_SIGVEC
-  struct sigvec sigVec;
+#ifdef HAVE_SIGACTION
+  struct sigaction sa;
 
-  sigVec.sv_handler = WindowChangeHandler;
-  sigVec.sv_mask = sigmask( SIGWINCH );
-  sigVec.sv_flags = SV_INTERRUPT;
-  sigvec( SIGWINCH, &sigVec, NULL );
+  sa.sa_handler = WindowChangeHandler;
+  sigemptyset( &sa.sa_mask );
+  sa.sa_flags = 0;           /* No SA_RESTART means interrupt syscalls.  */
+  sigaction( SIGWINCH, &sa, NULL );
 
-  sigVec.sv_handler = InterruptHandler;
-  sigVec.sv_mask = sigmask( SIGINT );
-  sigVec.sv_flags = SV_INTERRUPT;
-  sigvec( SIGINT, &sigVec, NULL );
+  sa.sa_handler = InterruptHandler;
+  sigemptyset( &sa.sa_mask );
+  sa.sa_flags = 0;           /* No SA_RESTART means interrupt syscalls.  */
+  sigaction( SIGINT, &sa, NULL );
 #else
 # ifdef SIGWINCH
   signal( SIGWINCH, WindowChangeHandler );
 # endif
   signal( SIGINT, InterruptHandler );
-#endif /* HAVE_SIGVEC */
+#endif /* HAVE_SIGACTION */
 
 #ifdef UNIX
 #ifdef HAVE_TERMIOS_H
