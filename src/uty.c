@@ -99,6 +99,16 @@ public void *Malloc( unsigned int size )
   return ptr;
 }
 
+public void *Realloc( void *ptr, unsigned int size )
+{
+  void *newptr;
+
+  if( NULL == (newptr = realloc( ptr, size )) )
+    NotEnoughMemory();
+
+  return newptr;
+}
+
 #define TOKEN_LENGTH	32
 
 public byte *TokenAlloc( byte *s )
