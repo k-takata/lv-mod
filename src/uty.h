@@ -27,6 +27,7 @@ public void NotEnoughMemory();
 public void FatalErrorOccurred();
 
 public void *Malloc( unsigned int size );
+public void *Realloc( void *ptr, unsigned int size );
 public byte *TokenAlloc( byte *s );
 public byte *Strdup( byte *s );
 

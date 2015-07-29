@@ -97,6 +97,8 @@
 /*#define LV_HELP_PATH	"/usr/local/lib/lv/"*/ /* now defined through make */
 
 private byte *lvHelpFile[ 2 ];
+private int filesCount = 32;
+private int filesIndex = 0;
 
 private void ConfInitArgs( conf_t *conf )
 {
@@ -405,8 +407,18 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
   } else {
     if( TRUE == grep_mode && NULL == conf->pattern )
       conf->pattern = *argv;
-    else if( NULL == conf->file )
-      conf->file = argv;
+    else {
+      if( NULL == conf->file )
+	conf->file = Malloc( filesCount * sizeof( byte * ) );
+      if(conf->file != lvHelpFile){
+	if( filesIndex >= filesCount - 1 ){
+	  filesCount *= 2;
+	  conf->file = Realloc( conf->file, filesCount * sizeof( byte * ) );
+	}
+	conf->file[ filesIndex++ ] = *argv;
+	conf->file[ filesIndex ] = NULL;
+      }
+    }
   }
 }
 

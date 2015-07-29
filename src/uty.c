@@ -99,6 +99,16 @@ public void *Malloc( unsigned int size )
   return ptr;
 }
 
+public void *Realloc( void *ptr, unsigned int size )
+{
+  void *newptr;
+
+  if( NULL == (newptr = realloc( ptr, size )) )
+    NotEnoughMemory();
+
+  return newptr;
+}
+
 #ifdef PATH_MAX
 #define TOKEN_LENGTH	( PATH_MAX + 1 )
 #elif defined( _MAX_PATH )
