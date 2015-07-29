@@ -104,7 +104,7 @@ public void *Malloc( unsigned int size )
 #elif defined( _MAX_PATH )
 #define TOKEN_LENGTH	_MAX_PATH
 #else
-#define TOKEN_LENGTH 	32
+#define TOKEN_LENGTH	32
 #endif
 
 public byte *TokenAlloc( byte *s )
