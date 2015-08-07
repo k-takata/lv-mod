@@ -1,10 +1,17 @@
-dnl Process this file with autoconf to produce a configure script.
-AC_INIT(lv)
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.68])
+
+AC_INIT(lv, 4.51)
+AM_INIT_AUTOMAKE([foreign])
+
+AC_CONFIG_SRCDIR([src/lv.c])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
-dnl Checks for programs.
+# Checks for programs.
 AC_PROG_LN_S
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -24,7 +31,7 @@ AC_ARG_ENABLE(purify,
 	fi],
 	[AC_MSG_RESULT(no)])
 
-dnl Checks host type
+# Checks host type
 case "$host" in
   i?86-win32* | i?86-*-mingw* | x86_64-*-mingw*)
 	;;
@@ -34,23 +41,23 @@ case "$host" in
 	;;
 esac
 
-dnl Checks for libraries.
+# Checks for libraries.
 AC_CHECK_LIB(terminfo, tgetstr,, [AC_CHECK_LIB(termcap, tgetstr,, [AC_CHECK_LIB(ncurses, tgetstr,, [AC_CHECK_LIB(curses, tgetstr)])])])
 
-dnl Checks for header files.
+# Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h termio.h unistd.h termios.h locale.h)
 
-dnl Checks for typedefs, structures, and compiler characteristics.
+# Checks for typedefs, structures, and compiler characteristics.
 
-dnl Checks for library functions.
+# Checks for library functions.
 AC_CHECK_FUNCS(sigaction tgetnum setlocale)
 AC_FUNC_GETPGRP
 AC_PROG_GCC_TRADITIONAL
 AC_TYPE_SIGNAL
 
-dnl From Bruno Haible.
+# From Bruno Haible.
 
 AC_DEFUN([AM_LANGINFO_CODESET],
 [
@@ -83,5 +90,6 @@ AC_ARG_ENABLE(fastio,
 	 fi],
 	[AC_MSG_RESULT(no)])
 
-dnl AC_OUTPUT(Makefile src/Makefile)
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile
+		 src/Makefile])
+AC_OUTPUT
