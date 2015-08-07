@@ -1352,9 +1352,9 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
- --enable-purify          enables checks by purify
+  --enable-purify         enables checks by purify
   --disable-largefile     omit support for large files
- --enable-fastio          tries to reduce stdio overhead
+  --enable-fastio         tries to reduce stdio overhead
 
 Some influential environment variables:
   CC          C compiler command

@@ -23,7 +23,7 @@ AC_MSG_CHECKING(if --enable-purify is specified)
 AC_SUBST(PURIFY)
 PURIFY=
 AC_ARG_ENABLE(purify,
-	[ --enable-purify          enables checks by purify],
+	[  --enable-purify         enables checks by purify],
 	[AC_MSG_RESULT(yes)
 	AC_PATH_PROGS(PURIFY, purify, "")
 	if test "$PURIFY" != ""; then
@@ -81,7 +81,7 @@ AC_FUNC_FSEEKO
 
 AC_MSG_CHECKING(whether fastio is used)
 AC_ARG_ENABLE(fastio,
-	[ --enable-fastio          tries to reduce stdio overhead],
+	[  --enable-fastio         tries to reduce stdio overhead],
 	[if ! test "$enableval" = no; then
 	 	AC_DEFINE(USE_INTERNAL_IOBUF, 1)
 		AC_MSG_RESULT(yes)
