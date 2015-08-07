@@ -79,6 +79,13 @@ typedef struct {
 #endif
 } iobuf_t;
 
+#if defined( _MSC_VER ) && _MSC_VER >= 1400
+#define HAVE_FSEEKO
+#define	off_t	__int64
+#define ftello( a )			_ftelli64( a )
+#define fseeko( a, b, c )	_fseeki64( a, b, c )
+#endif /* _MSC_VER */
+
 #ifdef HAVE_FSEEKO
 typedef off_t	offset_t;
 #else

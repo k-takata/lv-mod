@@ -20,6 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef _WIN32
+#include <windows.h>
+#endif /* _WIN32 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,7 +69,29 @@
 #define LV_CONF 	"_lv"
 #endif /* MSDOS */
 
+#ifdef _WIN32
+#ifdef USE_UNICODE_IO
+#define DEFAULT_OUTPUT_CODING_SYSTEM	UTF_8
+#define DEFAULT_KEYBOARD_CODING_SYSTEM	UTF_8
+#define DEFAULT_PATHNAME_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_DEFAULT_CODING_SYSTEM	UTF_8
+#else /* USE_UNICODE_IO */
+#define DEFAULT_OUTPUT_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_KEYBOARD_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_PATHNAME_CODING_SYSTEM	SHIFT_JIS
+#define DEFAULT_DEFAULT_CODING_SYSTEM	SHIFT_JIS
+#endif /* USE_UNICODE_IO */
+
+#define LV_CONF 	"_lv"
+#endif /* _WIN32 */
+
+#ifdef PATH_MAX
+#define BUF_SIZE	( PATH_MAX + 1 )
+#elif defined( _MAX_PATH )
+#define BUF_SIZE	_MAX_PATH
+#else
 #define BUF_SIZE 	128
+#endif
 
 #define LV_HELP		"lv.hlp"
 /*#define LV_HELP_PATH	"/usr/local/lib/lv/"*/ /* now defined through make */
@@ -95,7 +121,7 @@ private void ConfInitArgs( conf_t *conf )
   conf->height	= -1;
   conf->options	= TRUE;
   conf->inputCodingSystem	= DEFAULT_INPUT_CODING_SYSTEM;
-#ifdef HAVE_SETLOCALE
+#if defined( HAVE_SETLOCALE ) && !defined( USE_UNICODE_IO )
   if (use_locale) {
     conf->keyboardCodingSystem	= localeCodingSystem;
     conf->outputCodingSystem	= localeCodingSystem;
@@ -267,7 +293,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
       case 'W': conf->width = atoi( s + 1 ); break;
       case 'H': conf->height = atoi( s + 1 ); break;
       case 'E':
-	if( editor_program && ( editor_program[0] != 0x00 ) )
+	if( editor_program )
 	  free( editor_program );
 	if( '\'' == *( s + 1 ) ||  '"' == *( s + 1 ) ){
 	  quotationChar = *( s + 1 );
@@ -276,13 +302,12 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	  while( 0x00 != *s && quotationChar != *s )
 	    s++;
 	} else {
-	  editor_program = Malloc( strlen( s + 1 ) + 1 );
-	  strcpy( editor_program, s + 1 );
+	  editor_program = Strdup( s + 1 );
 	  s += strlen( s ) - 1;
 	}
 	break;
       case 'F':
-	if( filter_program && ( filter_program[0] != 0x00 ) )
+	if( filter_program )
 	  free( filter_program );
 	if( '\'' == *( s + 1 ) ||  '"' == *( s + 1 ) ){
 	  quotationChar = *( s + 1 );
@@ -291,8 +316,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	  while( 0x00 != *s && quotationChar != *s )
 	    s++;
 	} else {
-	  filter_program = Malloc( strlen( s + 1 ) + 1 );
-	  strcpy( filter_program, s + 1 );
+	  filter_program = Strdup( s + 1 );
 	  s += strlen( s ) - 1;
 	}
 	break;
@@ -434,6 +458,15 @@ public void Conf( conf_t *conf, byte **argv )
     strcat( buf, "/" LV_CONF );
     ConfFile( conf, buf );
   }
+#ifdef _WIN32
+  else if( NULL != (ptr = getenv( "USERPROFILE" )) ){
+    strcpy( buf, ptr );
+    strcat( buf, "/" LV_CONF );
+    ConfFile( conf, buf );
+  } else {
+    ConfFile( conf, LV_CONF );
+  }
+#endif /* _WIN32 */
 
 #ifdef MSDOS
   ConfFile( conf, LV_CONF );
@@ -467,10 +500,28 @@ public void ConfInit( byte **argv )
       }
     }
     if( i < 0 ) i = 0;
-    helpFile[ i ] = NULL;
+    helpFile[ i ] = '\0';
     strcat( helpFile, LV_HELP );
   }
-#else
+#elif defined( _WIN32 )
+  {
+    int i;
+    char exe[MAX_PATH];
+
+    GetModuleFileNameA( NULL, exe, sizeof(exe) );
+    helpFile = Malloc( strlen( exe ) + strlen( LV_HELP ) + 1 );
+    strcpy( helpFile, exe );
+    for( i = strlen( helpFile ) - 1 ; i >= 0 ; i-- ){
+      if( '/' == helpFile[ i ] || '\\' == helpFile[ i ] ){
+	i++;
+	break;
+      }
+    }
+    if( i < 0 ) i = 0;
+    helpFile[ i ] = '\0';
+    strcat( helpFile, LV_HELP );
+  }
+#else /* _WIN32 */
   helpFile = Malloc( strlen( LV_HELP_PATH "/" LV_HELP ) + 1 );
   strcpy( helpFile, LV_HELP_PATH "/" LV_HELP );
 #endif /* MSDOS */

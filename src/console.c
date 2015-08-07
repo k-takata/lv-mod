@@ -29,6 +29,10 @@
 #include <dos.h>
 #endif /* MSDOS */
 
+#ifdef _WIN32
+#include <windows.h>
+#endif /* _WIN32 */
+
 #ifdef UNIX
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,7 +61,7 @@
 
 #define ANSI_ATTR_LENGTH	8
 
-#if defined( MSDOS ) || defined( WIN32 )
+#if defined( MSDOS ) || defined( _WIN32 )
 private char tbuf[ 16 ];
 
 private char *clear_screen		= "\x1b[2J";
@@ -77,14 +81,41 @@ private char *exit_ca_mode		= NULL;
 private char *keypad_local		= NULL;
 private char *keypad_xmit		= NULL;
 
-private void tputs( char *cp, int affcnt, int (*outc)(char) )
+private void tputs( char *cp, int affcnt, int (*outc)(byte) )
 {
   while( *cp )
     outc( *cp++ );
 }
 
-private int (*putfunc)(char) = ConsolePrint;
-#endif /* MSDOS */
+private int (*putfunc)(byte) = ConsolePrint;
+#endif /* MSDOS,_WIN32 */
+
+#ifdef _WIN32
+#ifndef FOREGROUND_WHITE
+#define FOREGROUND_WHITE (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
+#endif
+#ifndef BACKGROUND_WHITE
+#define BACKGROUND_WHITE (BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
+#endif
+#ifndef FOREGROUND_BLACK
+#define FOREGROUND_BLACK FOREGROUND_INTENSITY
+#endif
+#ifndef BACKGROUND_BLACK
+#define BACKGROUND_BLACK BACKGROUND_INTENSITY
+#endif
+#ifndef FOREGROUND_MASK
+#define FOREGROUND_MASK (FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_INTENSITY)
+#endif
+#ifndef BACKGROUND_MASK
+#define BACKGROUND_MASK (BACKGROUND_RED|BACKGROUND_BLUE|BACKGROUND_GREEN|BACKGROUND_INTENSITY)
+#endif
+
+private WORD console_attr = 0;
+private HANDLE stdout_handle = NULL;
+private HANDLE console_handle = NULL;
+private DWORD initial_mode;
+private DWORD new_mode;
+#endif /* _WIN32 */
 
 #ifdef UNIX
 
@@ -130,6 +161,53 @@ private char *exit_ca_mode		= NULL;
 private char *keypad_local		= NULL;
 private char *keypad_xmit		= NULL;
 #endif /* TERMCAP */
+
+#ifdef _WIN32
+private WORD GetWin32Attribute( byte attr )
+{
+  WORD attr_new = FOREGROUND_WHITE;
+  if( ATTR_STANDOUT & attr ){
+    attr_new =
+      ((attr_new & FOREGROUND_MASK) << 4) |
+      ((attr_new & BACKGROUND_MASK) >> 4);
+  } else if( ATTR_COLOR & attr ){
+    if( ATTR_REVERSE & attr ){
+      if( ATTR_COLOR_B & attr ){
+	attr_new = (attr_new & BACKGROUND_MASK)
+	  | FOREGROUND_INTENSITY;
+	if((ATTR_COLOR & attr) & 1) attr_new |= BACKGROUND_RED;
+	if((ATTR_COLOR & attr) & 2) attr_new |= BACKGROUND_GREEN;
+	if((ATTR_COLOR & attr) & 4) attr_new |= BACKGROUND_BLUE;
+      } else {
+	attr_new = (attr_new & BACKGROUND_MASK)
+	  | FOREGROUND_INTENSITY | FOREGROUND_WHITE;
+	if((ATTR_COLOR & attr) & 1) attr_new |= BACKGROUND_RED;
+	if((ATTR_COLOR & attr) & 2) attr_new |= BACKGROUND_GREEN;
+	if((ATTR_COLOR & attr) & 4) attr_new |= BACKGROUND_BLUE;
+      }
+    } else {
+      attr_new = (attr_new & BACKGROUND_MASK);
+      if((ATTR_COLOR & attr) & 1) attr_new |= FOREGROUND_RED;
+      if((ATTR_COLOR & attr) & 2) attr_new |= FOREGROUND_GREEN;
+      if((ATTR_COLOR & attr) & 4) attr_new |= FOREGROUND_BLUE;
+    }
+  } else if( ATTR_REVERSE & attr ){
+    attr_new =
+      ((attr_new & FOREGROUND_MASK) << 4) |
+      ((attr_new & BACKGROUND_MASK) >> 4);
+  }
+  if( ATTR_BLINK & attr ){
+    attr_new |= FOREGROUND_INTENSITY;
+  }
+  if( ATTR_UNDERLINE & attr ){
+    attr_new |= FOREGROUND_INTENSITY;
+  }
+  if( ATTR_HILIGHT & attr ){
+    attr_new |= FOREGROUND_INTENSITY;
+  }
+  return attr_new;
+}
+#endif /* _WIN32 */
 
 public void ConsoleInit()
 {
@@ -204,10 +282,6 @@ public void ConsoleDisableInterrupt()
 public void ConsoleGetWindowSize()
 {
 #ifdef UNIX
-#ifdef WIN32
-  WIDTH  = 80;
-  HEIGHT = 24;
-#else /* WIN32 */
   struct winsize winSize;
 
   ioctl( 0, TIOCGWINSZ, &winSize );
@@ -224,8 +298,21 @@ public void ConsoleGetWindowSize()
     if( 0 >= WIDTH || 0 >= HEIGHT )
       WIDTH = 80, HEIGHT = 24;
   }
-#endif /* WIN32 */
 #endif /* UNIX */
+
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  SMALL_RECT rect;
+  int width, height;
+  GetConsoleScreenBufferInfo( console_handle, &csbi );
+  width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  height = csbi.srWindow.Bottom - csbi.srWindow.Top;
+  if( width != WIDTH || height != HEIGHT ){
+    window_changed = TRUE;
+    WIDTH = width;
+    HEIGHT = height;
+  }
+#endif /* _WIN32 */
 }
 
 #ifdef UNIX
@@ -249,7 +336,7 @@ public void ConsoleTermInit()
    * 3. initialize terminal status
    */
 
-#if defined( MSDOS ) || defined( WIN32 )
+#ifdef MSDOS
   byte *ptr;
 
 #define ANSI		0
@@ -287,8 +374,16 @@ public void ConsoleTermInit()
   cur_down		= "\x1bP";
   cur_ppage		= "\x1bI";
   cur_npage		= "\x1bQ";
-
 #endif /* MSDOS */
+
+#ifdef _WIN32
+  no_scroll		= FALSE;
+
+  console_handle = CreateConsoleScreenBuffer(
+      GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+      NULL, CONSOLE_TEXTMODE_BUFFER, NULL );
+  ConsoleGetWindowSize();
+#endif /* _WIN32 */
 
 #ifdef TERMCAP
   byte *term, *ptr;
@@ -388,6 +483,24 @@ public void ConsoleSetUp()
   signal( SIGINT, InterruptIgnoreHandler );
 #endif /* MSDOS */
 
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  SMALL_RECT rect;
+  COORD coord;
+  DWORD written;
+
+  GetConsoleScreenBufferInfo( console_handle, &csbi );
+  console_attr = csbi.wAttributes;
+  rect = csbi.srWindow;
+  coord = GetLargestConsoleWindowSize( console_handle );
+  SetConsoleScreenBufferSize( console_handle, coord );
+  GetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), &initial_mode );
+  new_mode = initial_mode &
+    ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT );
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), new_mode );
+  SetConsoleActiveScreenBuffer( console_handle );
+#endif /* _WIN32 */
+
 #ifdef HAVE_SIGACTION
   struct sigaction sa;
 
@@ -439,6 +552,11 @@ public void ConsoleSetUp()
 
 public void ConsoleSetDown()
 {
+#ifdef _WIN32
+  CloseHandle( console_handle );
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), initial_mode );
+#endif /* _WIN32 */
+
 #ifdef UNIX
 #ifdef HAVE_TERMIOS_H
   tcsetattr( 0, TCSADRAIN, &ttyOld );
@@ -468,22 +586,32 @@ public void ConsoleShellEscape()
 #endif /* HAVE_TERMIOS_H */
 #endif /* UNIX */
 
+#ifdef _WIN32
+  SetConsoleActiveScreenBuffer( GetStdHandle( STD_OUTPUT_HANDLE ) );
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), initial_mode );
+#else /* _WIN32 */
   if( keypad_local )
     tputs( keypad_local, 1, putfunc );
   if( exit_ca_mode )
     tputs( exit_ca_mode, 1, putfunc );
   else
     ConsoleSetCur( 0, HEIGHT - 1 );
+#endif /* _WIN32 */
 
   ConsoleFlush();
 }
 
 public void ConsoleReturnToProgram()
 {
+#ifdef _WIN32
+  SetConsoleActiveScreenBuffer( console_handle );
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), new_mode );
+#else /* _WIN32 */
   if( keypad_xmit )
     tputs( keypad_xmit, 1, putfunc );
   if( enter_ca_mode )
     tputs( enter_ca_mode, 1, putfunc );
+#endif /* _WIN32 */
 
 #ifdef UNIX
 #ifdef HAVE_TERMIOS_H
@@ -496,7 +624,7 @@ public void ConsoleReturnToProgram()
 
 public void ConsoleSuspend()
 {
-#ifndef MSDOS /* if NOT defind */
+#if !defined( MSDOS ) && !defined( _WIN32 ) /* if NOT defind */
   kill(0, SIGSTOP);	/*to pgrp*/
 #endif
 }
@@ -506,6 +634,57 @@ public int ConsoleGetChar()
 #ifdef MSDOS
   return getch();
 #endif /* MSDOS */
+
+#ifdef _WIN32
+  static byte u8buf[ 4 ];
+  static int inindex = 0;
+  static int outindex = 0;
+  WCHAR buf[ 2 ];
+  int ch, cnt;
+
+  if( outindex < inindex )
+    return u8buf[ outindex++ ];
+
+  cnt = 0;
+  buf[ cnt++ ] = ch = _getwch();
+
+  ConsoleGetWindowSize();
+
+  if( 0xe0 == ch || 0x00 == ch ){
+    /* Extended keys or function keys */
+    ch = _getwch();
+    switch( ch ){
+      case 0x49: /* PageUp */
+	return STX; /* C-b */
+      case 0x51: /* PageDown */
+	return ACK; /* C-f */
+      case 0x53: /* Del */
+	return DEL;
+      case 0x47: /* Home */
+      case 0x4f: /* End */
+      case 0x52: /* Ins */
+	return 0; /* ignore */
+      default:
+	if( 0x3b <= ch && ch <= 0x44 )  /* F1..F10 */
+	  return 0; /* ignore */
+	return ch;
+    }
+  }
+  if( IS_HIGH_SURROGATE( ch ) )
+    buf[ cnt++ ] = _getwch();
+
+#ifdef USE_UNICODE_IO
+  inindex = WideCharToMultiByte( CP_UTF8, 0, buf, cnt, u8buf,
+      sizeof( u8buf ), NULL, NULL );
+#else /* USE_UNICODE_IO */
+  inindex = WideCharToMultiByte( CP_ACP, 0, buf, cnt, u8buf,
+      sizeof( u8buf ), NULL, NULL );
+#endif /* USE_UNICODE_IO */
+  if( 0 == inindex )
+    return 0;
+  outindex = 0;
+  return u8buf[ outindex++ ];
+#endif /* _WIN32 */
 
 #ifdef UNIX
   byte buf;
@@ -537,6 +716,38 @@ public int ConsolePrint( byte c )
 */
 #endif /* MSDOS */
 
+#ifdef _WIN32
+#ifdef USE_UNICODE_IO
+  static byte buf[ 5 ];
+  static int index = 0;
+  static int len = 0;
+
+  if( 0 == len ){
+    index = 0;
+    if( (c & 0x80) == 0x00 )
+      len = 1;
+    else if( (c & 0xe0) == 0xc0 )
+      len = 2;
+    else if( (c & 0xf0) == 0xe0 )
+      len = 3;
+    else if( (c & 0xf8) == 0xf0 )
+      len = 4;
+    else
+      len = 1;
+  }
+  buf[ index++ ] = c;
+  if( index == len ){
+    buf[ index ] = '\0';
+    ConsolePrints( buf );
+    len = 0;
+  }
+  return c;
+#else /* USE_UNICODE_IO */
+  DWORD written;
+  WriteFile( console_handle, &c, 1, &written, NULL );
+#endif /* USE_UNICODE_IO */
+#endif /* _WIN32 */
+
 #ifdef UNIX
   return putchar( c );
 #endif /* UNIX */
@@ -544,8 +755,25 @@ public int ConsolePrint( byte c )
 
 public void ConsolePrints( byte *str )
 {
+#if defined( _WIN32 ) && defined( USE_UNICODE_IO )
+  int size, ret;
+  LPWSTR buf;
+  DWORD written;
+
+  size = MultiByteToWideChar( CP_UTF8, 0, str, -1, NULL, 0 );
+  if( 0 == size )
+    return;
+  buf = ( LPWSTR )Malloc( size * sizeof( WCHAR ) );
+  if( NULL == buf )
+    return;
+  ret = MultiByteToWideChar( CP_UTF8, 0, str, -1, buf, size );
+  if( ret > 1 )
+    WriteConsoleW( console_handle, buf, ret - 1, &written, NULL );
+  free( buf );
+#else /* _WIN32,USE_UNICODE_IO */
   while( *str )
     ConsolePrint( *str++ );
+#endif /* _WIN32,USE_UNICODE_IO */
 }
 
 public void ConsolePrintsStr( str_t *str, int length )
@@ -574,10 +802,17 @@ public void ConsoleFlush()
 
 public void ConsoleSetCur( int x, int y )
 {
-#if defined( MSDOS ) || defined( WIN32 )
+#ifdef MSDOS
   sprintf( tbuf, "\x1b[%d;%dH", y + 1, x + 1 );
   ConsolePrints( tbuf );
 #endif /* MSDOS */
+
+#ifdef _WIN32
+  COORD coord;
+  if( x != -1 ) coord.X = x;
+  if( y != -1 ) coord.Y = y;
+  SetConsoleCursorPosition( console_handle, coord );
+#endif /* _WIN32 */
 
 #ifdef TERMCAP
   tputs( tgoto( cursor_address, x, y ), 1, putfunc );
@@ -590,47 +825,131 @@ public void ConsoleSetCur( int x, int y )
 
 public void ConsoleOnCur()
 {
+#ifdef _WIN32
+  CONSOLE_CURSOR_INFO cci;
+  GetConsoleCursorInfo( console_handle, &cci );
+  cci.bVisible = TRUE;
+  SetConsoleCursorInfo( console_handle, &cci );
+#else /* _WIN32 */
   if( cursor_visible )
     tputs( cursor_visible, 1, putfunc );
+#endif /* _WIN32 */
 }
 
 public void ConsoleOffCur()
 {
+#ifdef _WIN32
+  CONSOLE_CURSOR_INFO cci;
+  GetConsoleCursorInfo( console_handle, &cci );
+  cci.bVisible = FALSE;
+  SetConsoleCursorInfo( console_handle, &cci );
+#else /* _WIN32 */
   if( cursor_invisible )
     tputs( cursor_invisible, 1, putfunc );
+#endif /* _WIN32 */
 }
 
 public void ConsoleClearScreen()
 {
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  COORD coord = {0, 0};
+  DWORD size, written;
+  GetConsoleScreenBufferInfo( console_handle, &csbi );
+  size = csbi.dwSize.X * csbi.dwSize.Y;
+  FillConsoleOutputCharacter( console_handle, ' ', size, coord, &written );
+  FillConsoleOutputAttribute( console_handle,
+    csbi.wAttributes, size, coord, &written );
+  SetConsoleCursorPosition( console_handle, coord );
+#else /* _WIN32 */
   tputs( clear_screen, 1, putfunc );
+#endif /* _WIN32 */
 }
 
 public void ConsoleClearRight()
 {
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  COORD coord;
+  DWORD size, written;
+  GetConsoleScreenBufferInfo( console_handle, &csbi );
+  coord = csbi.dwCursorPosition;
+  size = csbi.dwSize.X - coord.X;
+  FillConsoleOutputCharacter( console_handle, ' ', size, coord, &written );
+  FillConsoleOutputAttribute( console_handle,
+    csbi.wAttributes, size, coord, &written );
+  SetConsoleCursorPosition( console_handle, csbi.dwCursorPosition );
+#else /* _WIN32 */
   tputs( clr_eol, 1, putfunc );
+#endif /* _WIN32 */
 }
 
 public void ConsoleGoAhead()
 {
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  COORD coord;
+  GetConsoleScreenBufferInfo( console_handle, &csbi );
+  csbi.dwCursorPosition.X = 0;
+  SetConsoleCursorPosition( console_handle, csbi.dwCursorPosition );
+#else /* _WIN32 */
   ConsolePrint( 0x0d );
+#endif /* _WIN32 */
 }
 
 public void ConsoleScrollUp()
 {
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  SMALL_RECT rect;
+  CHAR_INFO ci;
+  COORD coord;
+  GetConsoleScreenBufferInfo( console_handle, &csbi );
+  rect = csbi.srWindow;
+  rect.Top = 1;
+  coord.X = 0;
+  coord.Y = 0;
+  ci.Char.AsciiChar = ' ';
+  ci.Attributes = csbi.wAttributes;
+  ScrollConsoleScreenBuffer( console_handle, &rect, &csbi.srWindow,
+      coord, &ci );
+  SetConsoleCursorPosition( console_handle, csbi.dwCursorPosition );
+#else /* _WIN32 */
   if( delete_line )
     tputs( delete_line, 1, putfunc );
+#endif /* _WIN32 */
 }
 
 public void ConsoleScrollDown()
 {
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  SMALL_RECT rect;
+  CHAR_INFO ci;
+  COORD coord;
+  GetConsoleScreenBufferInfo( console_handle, &csbi );
+  rect = csbi.srWindow;
+  coord.X = 0;
+  coord.Y = 1;
+  ci.Char.AsciiChar = ' ';
+  ci.Attributes = csbi.wAttributes;
+  ScrollConsoleScreenBuffer( console_handle, &rect, &csbi.srWindow,
+      coord, &ci );
+  SetConsoleCursorPosition( console_handle, csbi.dwCursorPosition );
+#else /* _WIN32 */
   if( insert_line )
     tputs( insert_line, 1, putfunc );
+#endif /* _WIN32 */
 }
 
 private byte prevAttr = 0;
 
 public void ConsoleSetAttribute( byte attr )
 {
+#ifdef _WIN32
+  SetConsoleTextAttribute( console_handle, GetWin32Attribute( attr ) );
+  prevAttr = attr;
+#else /* _WIN32 */
 #ifndef MSDOS /* IF NOT DEFINED */
   if( TRUE == allow_ansi_esc ){
 #endif /* MSDOS */
@@ -697,4 +1016,5 @@ public void ConsoleSetAttribute( byte attr )
   }
   prevAttr = attr;
 #endif /* MSDOS */
+#endif /* _WIN32 */
 }

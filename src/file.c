@@ -308,10 +308,12 @@ public boolean_t FileStretch( file_t *f, unsigned int target )
 	  return FALSE;
       }
     }
+#ifndef _WIN32
     if( -1 != f->pid && IobufFeof( &f->sp ) ){
       int status;
       wait( &status );
     }
+#endif /* _WIN32 */
   } else {
 #endif /* MSDOS */
     while( EOF != (ch = IobufGetc( &f->fp )) ){

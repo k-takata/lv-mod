@@ -109,7 +109,13 @@ public void *Realloc( void *ptr, unsigned int size )
   return newptr;
 }
 
+#ifdef PATH_MAX
+#define TOKEN_LENGTH	( PATH_MAX + 1 )
+#elif defined( _MAX_PATH )
+#define TOKEN_LENGTH	_MAX_PATH
+#else
 #define TOKEN_LENGTH	32
+#endif
 
 public byte *TokenAlloc( byte *s )
 {
@@ -137,7 +143,7 @@ public byte *TokenAlloc( byte *s )
     }
   }
   if( i == TOKEN_LENGTH )
-    return "";
+    return Strdup("");
 
   token = (byte *)Malloc( i + 1 );
   for( j = 0 ; j < i ; j++ )
@@ -145,6 +151,15 @@ public byte *TokenAlloc( byte *s )
   token[ j ] = 0x00;
 
   return token;
+}
+
+public byte *Strdup( byte *s )
+{
+  byte *p;
+
+  p = Malloc( strlen( s ) + 1 );
+  strcpy( p, s );
+  return p;
 }
 
 #ifdef MSDOS

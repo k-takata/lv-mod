@@ -29,6 +29,10 @@
 #include <dos.h>
 #endif /* MSDOS */
 
+#ifdef _WIN32
+#include <windows.h>
+#endif /* _WIN32 */
+
 #ifdef UNIX
 #include <unistd.h>
 #include <signal.h>
@@ -474,9 +478,9 @@ private void CommandQuit( unsigned int arg )
 
 private void CommandShellEscape( unsigned int arg )
 {
-#ifdef MSDOS
+#if defined( MSDOS ) || defined( _WIN32 )
   byte *shell;
-#endif /* MSDOS */
+#endif /* MSDOS,_WIN32 */
 
   ConsoleShellEscape();
 
@@ -484,14 +488,14 @@ private void CommandShellEscape( unsigned int arg )
   FileRefresh( f );
   IstrFreeAll();
 
-#ifdef MSDOS
+#if defined( MSDOS ) || defined( _WIN32 )
   if( shell = getenv( "SHELL" ) )
     spawnlp( 0, shell, shell, NULL );
   else if( shell = getenv( "COMSPEC" ) )
     spawnlp( 0, shell, shell, NULL );
   else
     label = "shell unknown";
-#endif /* MSDOS */
+#endif /* MSDOS,_WIN32 */
 
 #ifdef UNIX
   ConsoleSuspend();
@@ -612,9 +616,9 @@ private int CommandLaunchEditor( byte *editor, byte *filename, int line )
   }
 #endif /* NOT */
 
-#ifdef MSDOS
+#if defined( MSDOS ) || defined ( _WIN32 )
   return spawnvp( 0, argv[ 0 ], argv );
-#else
+#else /* MSDOS,_WIN32 */
   if( 0 == (pid = fork()) ){
     execvp( argv[ 0 ], (char **)argv );
     exit( 1 );
@@ -627,7 +631,7 @@ private int CommandLaunchEditor( byte *editor, byte *filename, int line )
     } while (rv == -1 && errno == EINTR);
     return status;
   }
-#endif /* MSDOS */
+#endif /* MSDOS,_WIN32 */
 }
 
 private void CommandEdit( unsigned int arg )
@@ -710,6 +714,14 @@ private void CommandBottomOfFile( unsigned int arg )
   if( TRUE == ScreenBot( f ) )
     DisplayFull( f );
 }
+
+#if defined( _WIN32 ) && defined( _MSC_VER )
+private int usleep(int usec)
+{
+  Sleep(usec / 1000);
+  return 0;
+}
+#endif /* _WIN32,_MSC_VER */
 
 private void CommandPoll( unsigned int arg )
 {
