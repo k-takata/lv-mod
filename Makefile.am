@@ -5,8 +5,7 @@
 SUBDIRS = src
 
 EXTRA_DIST = .editorconfig .gitignore GPL.txt hello.sample hello.sample.gif \
-	     index.html lv.1 lv.hlp README README.md relnote.html \
-	     build/README
+	     index.html lv.1 lv.hlp README.md relnote.html build/README.txt
 
 EXTRA_DIST += src/Makefile.dos src/Makefile.mingw src/Makefile.msvc
 

@@ -228,8 +228,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = src
 EXTRA_DIST = .editorconfig .gitignore GPL.txt hello.sample \
-	hello.sample.gif index.html lv.1 lv.hlp README README.md \
-	relnote.html build/README src/Makefile.dos src/Makefile.mingw \
+	hello.sample.gif index.html lv.1 lv.hlp README.md relnote.html \
+	build/README.txt src/Makefile.dos src/Makefile.mingw \
 	src/Makefile.msvc src/big5.map src/big5.rev src/big5cns.map \
 	src/big5cns.pl src/d2u.pl src/d2uall.sh src/gb2312.map \
 	src/gb2312.rev src/iso885910.map src/iso885910.rev \
