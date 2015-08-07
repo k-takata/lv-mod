@@ -243,15 +243,15 @@ lv_SOURCES = itable.c ctable.c uty.c istr.c stream.c file.c guess.c \
 	raw.c fetch.c screen.c command.c display.c find.c re.c nfa.c \
 	dfa.c conv.c version.c conf.c lv.c console.c guesslocale.c \
 	utf.c unimap.c unirev.c
-CJKINFURL = ftp://ftp.ora.com/pub/examples/nutshell/ujip/doc/
+CJKINFURL = ftp://ftp.ora.com/pub/examples/nutshell/cjkv/doc/
 
 #
 # Unicode mapping tables
 #
-BIG5URL = ftp://ftp.unicode.org/Public/MAPPINGS/EASTASIA/OTHER
-GBURL = ftp://ftp.unicode.org/Public/MAPPINGS/EASTASIA/GB
-JISURL = ftp://ftp.unicode.org/Public/MAPPINGS/EASTASIA/JIS
-KSCURL = ftp://ftp.unicode.org/Public/MAPPINGS/EASTASIA/KSC
+BIG5URL = ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/OTHER
+GBURL = ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/GB
+JISURL = ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS
+KSCURL = ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/KSC
 ISO8859URL = ftp://ftp.unicode.org/Public/MAPPINGS/ISO8859
 all: all-am
 
@@ -627,8 +627,8 @@ big5cns.map: cjk.inf.gz
 	$(PERL) $(srcdir)/big5cns.pl > $@
 
 cjk.inf.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(CJKINFURL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(CJKINFURL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 
 #
 # map files
@@ -754,72 +754,72 @@ iso885916.rev: 8859-16.TXT.gz
 	$(PERL) $(srcdir)/rev8859.pl -s 16 -i 'zcat 8859-16.TXT.gz |' > $@
 
 BIG5.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(BIG5URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(BIG5URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 
 GB2312.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(GBURL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(GBURL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 
 JIS0201.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(JISURL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(JISURL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 JIS0208.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(JISURL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(JISURL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 JIS0212.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(JISURL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(JISURL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 
 KSX1001.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(KSCURL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(KSCURL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 
 8859-1.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-2.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-3.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-4.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-5.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-6.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-7.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-8.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-9.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-10.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-11.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-13.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-14.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-15.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 8859-16.TXT.gz:
-	if [ ! -f ${@:S/.gz//} ]; then fetch -o ${@:S/.gz//} $(ISO8859URL)/${@:S/.gz//} ; fi ; \
-	if [ -f ${@:S/.gz//} ]; then gzip ${@:S/.gz//} ; fi
+	if [ ! -f ${@:.gz=} ]; then wget -O ${@:.gz=} $(ISO8859URL)/${@:.gz=} ; fi ; \
+	if [ -f ${@:.gz=} ]; then gzip ${@:.gz=} ; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
