@@ -8,6 +8,7 @@
 #ifndef __VERSION_H__
 #define __VERSION_H__
 
+#undef VERSION
 #define VERSION		"v.4.51.b (May 14th, 2012)"
 
 public void Banner();
