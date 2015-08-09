@@ -30,11 +30,16 @@
 #endif /* MSDOS */
 
 #ifdef _WIN32
+#include <io.h>
+#include <process.h>
 #include <windows.h>
 #endif /* _WIN32 */
 
-#ifdef UNIX
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+
+#ifdef UNIX
 #include <signal.h>
 #include <sys/wait.h>
 #endif /* UNIX */
@@ -617,7 +622,7 @@ private int CommandLaunchEditor( byte *editor, byte *filename, int line )
 #endif /* NOT */
 
 #if defined( MSDOS ) || defined ( _WIN32 )
-  return spawnvp( 0, argv[ 0 ], argv );
+  return spawnvp( 0, argv[ 0 ], (char **)argv );
 #else /* MSDOS,_WIN32 */
   if( 0 == (pid = fork()) ){
     execvp( argv[ 0 ], (char **)argv );

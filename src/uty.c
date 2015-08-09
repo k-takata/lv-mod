@@ -32,6 +32,10 @@
 #include <dos.h>
 #endif /* MSDOS */
 
+#ifdef _WIN32
+#include <io.h>
+#endif /* _WIN32 */
+
 #include <import.h>
 #include <itable.h>
 #include <begin.h>

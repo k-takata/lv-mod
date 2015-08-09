@@ -21,6 +21,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include <import.h>
 #include <decode.h>
@@ -96,7 +97,7 @@ private byte GuessCodingSystem_EastAsia( byte *str, int length,
 	break;
       }
       if( ++i >= length )
-	break;	
+	break;
       ch = str[ i ];
       if( !IsEucByte( ch ) ) {
 	eucPenalty++;

@@ -40,6 +40,7 @@
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
+#include <process.h>
 #include <windows.h>
 #endif /* _WIN32 */
 
@@ -202,7 +203,7 @@ public stream_t *StreamOpen( byte *file )
       sout = dup( 1 );
       close( 1 );
       dup( fileno( st->fp ) );
-      if( 0 > spawnvp( 0, argv[0], argv ) )
+      if( 0 > spawnvp( 0, argv[0], (char **)argv ) )
 	FatalErrorOccurred();
       close( 1 );
       dup( sout );
