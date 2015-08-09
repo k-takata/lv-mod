@@ -4,12 +4,13 @@
 AC_PREREQ([2.68])
 
 AC_INIT(lv, 4.51)
-AM_INIT_AUTOMAKE([foreign])
-
 AC_CONFIG_SRCDIR([src/lv.c])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
+
+#AX_ENABLE_BUILDDIR
+AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
 AC_PROG_LN_S
