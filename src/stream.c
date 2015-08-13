@@ -89,7 +89,7 @@ private FILE *mytmpfile( void )
     return NULL;
 
   hFile = CreateFile( TempFileName, GENERIC_READ | GENERIC_WRITE,
-      0, NULL, CREATE_ALWAYS,
+      0, NULL, TRUNCATE_EXISTING,
       FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE, NULL );
   if( hFile == INVALID_HANDLE_VALUE )
     return NULL;
