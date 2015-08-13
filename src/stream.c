@@ -77,6 +77,8 @@ private FILE *mytmpfile( void )
   TCHAR TempPath[ MAX_PATH ];
   DWORD ret;
   HANDLE hFile;
+  static UINT cnt = 0;
+  UINT tick, org_cnt;
   int fd;
   FILE *fp;
 
@@ -84,13 +86,22 @@ private FILE *mytmpfile( void )
   if( ret > MAX_PATH || ret == 0 )
     return NULL;
 
-  ret = GetTempFileName( TempPath, TEXT( "lv" ), 0, TempFileName );
-  if( ret == 0 )
-    return NULL;
+  tick = GetTickCount();
+  org_cnt = cnt;
+  do {
+    if (++cnt - org_cnt > 65536)
+      return NULL;
+    if (tick + cnt == 0)
+      ++cnt;
+    ret = GetTempFileName( TempPath, TEXT( "lv" ), tick + cnt, TempFileName );
+    if( ret == 0 )
+      return NULL;
 
-  hFile = CreateFile( TempFileName, GENERIC_READ | GENERIC_WRITE,
-      0, NULL, TRUNCATE_EXISTING,
-      FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE, NULL );
+    hFile = CreateFile( TempFileName, GENERIC_READ | GENERIC_WRITE,
+	0, NULL, CREATE_NEW,
+	FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE, NULL );
+  } while ( hFile == INVALID_HANDLE_VALUE
+      && GetLastError() == ERROR_FILE_EXISTS );
   if( hFile == INVALID_HANDLE_VALUE )
     return NULL;
 
