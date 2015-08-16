@@ -23,6 +23,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#define _WIN32_WINNT 0x0600
 #include <ctype.h>
 #include <io.h>
 #include <wchar.h>
