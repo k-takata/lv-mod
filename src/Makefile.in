@@ -57,8 +57,12 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = lv$(EXEEXT)
+
+# MinGW specific sources
+@MINGW_TRUE@am__append_1 = iscygpty.h
+@MINGW_TRUE@am__append_2 = iscygpty.c
 subdir = src
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -69,6 +73,13 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
+am__lv_SOURCES_DIST = itable.c ctable.c uty.c istr.c stream.c file.c \
+	guess.c decode.c encode.c escape.c iso2022.c iso8859.c \
+	iso2cn.c iso2jp.c iso2kr.c kana.c eucjapan.c shiftjis.c big5.c \
+	hz.c raw.c fetch.c screen.c command.c display.c find.c re.c \
+	nfa.c dfa.c conv.c version.c conf.c lv.c console.c \
+	guesslocale.c utf.c unimap.c unirev.c iscygpty.c
+@MINGW_TRUE@am__objects_1 = iscygpty.$(OBJEXT)
 am_lv_OBJECTS = itable.$(OBJEXT) ctable.$(OBJEXT) uty.$(OBJEXT) \
 	istr.$(OBJEXT) stream.$(OBJEXT) file.$(OBJEXT) guess.$(OBJEXT) \
 	decode.$(OBJEXT) encode.$(OBJEXT) escape.$(OBJEXT) \
@@ -80,7 +91,7 @@ am_lv_OBJECTS = itable.$(OBJEXT) ctable.$(OBJEXT) uty.$(OBJEXT) \
 	re.$(OBJEXT) nfa.$(OBJEXT) dfa.$(OBJEXT) conv.$(OBJEXT) \
 	version.$(OBJEXT) conf.$(OBJEXT) lv.$(OBJEXT) \
 	console.$(OBJEXT) guesslocale.$(OBJEXT) utf.$(OBJEXT) \
-	unimap.$(OBJEXT) unirev.$(OBJEXT)
+	unimap.$(OBJEXT) unirev.$(OBJEXT) $(am__objects_1)
 lv_OBJECTS = $(am_lv_OBJECTS)
 lv_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -92,12 +103,21 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(lv_SOURCES)
-DIST_SOURCES = $(lv_SOURCES)
+DIST_SOURCES = $(am__lv_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__include_HEADERS_DIST = ascii.h attr.h begin.h big5.h boolean.h \
+	command.h conf.h console.h conv.h ctable.h ctable_e.h \
+	ctable_t.h decode.h dfa.h display.h encode.h escape.h \
+	eucjapan.h fetch.h file.h find.h guess.h guesslocale.h hz.h \
+	ichar.h import.h iso2022.h iso2cn.h iso2jp.h iso2kr.h \
+	iso8859.h istr.h itable.h itable_e.h itable_t.h kana.h \
+	keybind.h nfa.h position.h raw.h re.h screen.h shiftjis.h \
+	str.h stream.h unimap.h unirev.h utf.h uty.h version.h \
+	iscygpty.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -227,22 +247,21 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lvlibdir = $(libdir)/lv
-include_HEADERS = ascii.h attr.h begin.h big5.h boolean.h command.h conf.h \
-		  console.h conv.h ctable.h ctable_e.h ctable_t.h decode.h \
-		  dfa.h display.h encode.h escape.h eucjapan.h fetch.h \
-		  file.h find.h guess.h guesslocale.h hz.h ichar.h import.h \
-		  iso2022.h iso2cn.h iso2jp.h iso2kr.h iso8859.h istr.h \
-		  itable.h itable_e.h itable_t.h kana.h keybind.h nfa.h \
-		  position.h raw.h re.h screen.h shiftjis.h str.h stream.h \
-		  unimap.h unirev.h utf.h uty.h version.h
-
+include_HEADERS = ascii.h attr.h begin.h big5.h boolean.h command.h \
+	conf.h console.h conv.h ctable.h ctable_e.h ctable_t.h \
+	decode.h dfa.h display.h encode.h escape.h eucjapan.h fetch.h \
+	file.h find.h guess.h guesslocale.h hz.h ichar.h import.h \
+	iso2022.h iso2cn.h iso2jp.h iso2kr.h iso8859.h istr.h itable.h \
+	itable_e.h itable_t.h kana.h keybind.h nfa.h position.h raw.h \
+	re.h screen.h shiftjis.h str.h stream.h unimap.h unirev.h \
+	utf.h uty.h version.h $(am__append_1)
 # Unicode sources
 lv_SOURCES = itable.c ctable.c uty.c istr.c stream.c file.c guess.c \
 	decode.c encode.c escape.c iso2022.c iso8859.c iso2cn.c \
 	iso2jp.c iso2kr.c kana.c eucjapan.c shiftjis.c big5.c hz.c \
 	raw.c fetch.c screen.c command.c display.c find.c re.c nfa.c \
 	dfa.c conv.c version.c conf.c lv.c console.c guesslocale.c \
-	utf.c unimap.c unirev.c
+	utf.c unimap.c unirev.c $(am__append_2)
 CJKINFURL = ftp://ftp.ora.com/pub/examples/nutshell/cjkv/doc/
 
 #
@@ -355,6 +374,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/guess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/guesslocale.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hz.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iscygpty.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iso2022.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iso2cn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iso2jp.Po@am__quote@

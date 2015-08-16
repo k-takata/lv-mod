@@ -35,12 +35,15 @@ AC_ARG_ENABLE(purify,
 # Checks host type
 case "$host" in
   i?86-win32* | i?86-*-mingw* | x86_64-*-mingw*)
+	host_mingw=yes
 	;;
   *)
 	AC_DEFINE(UNIX)
 	AC_DEFINE(TERMCAP)
 	;;
 esac
+
+AM_CONDITIONAL([MINGW], [test x$host_mingw = xyes])
 
 # Checks for libraries.
 AC_CHECK_LIB(terminfo, tgetstr,, [AC_CHECK_LIB(termcap, tgetstr,, [AC_CHECK_LIB(ncurses, tgetstr,, [AC_CHECK_LIB(curses, tgetstr)])])])

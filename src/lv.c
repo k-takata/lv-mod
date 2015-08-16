@@ -38,6 +38,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <iscygpty.h>
 #endif /* _WIN32 */
 
 #include <import.h>
@@ -279,6 +280,11 @@ public int main( int argc, char **argv )
 
   if( IsAtty( 1 ) ){
     LvView( conf );
+#ifdef _WIN32
+  } else if( is_cygpty( 1 ) ){
+    fprintf( stderr, "lv: Output to Cygwin/MSYS pty is not supported.\n" );
+    exit( 1 );
+#endif
   } else {
     LvConv( conf );
   }

@@ -24,6 +24,12 @@ lv_SOURCES = itable.c ctable.c uty.c istr.c stream.c file.c guess.c decode.c \
 # Unicode sources
 lv_SOURCES += utf.c unimap.c unirev.c
 
+# MinGW specific sources
+if MINGW
+include_HEADERS += iscygpty.h
+lv_SOURCES += iscygpty.c
+endif
+
 
 
 

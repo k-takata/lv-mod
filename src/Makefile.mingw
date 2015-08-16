@@ -23,11 +23,12 @@ OBJS=	itable.$(O) ctable.$(O) uty.$(O) istr.$(O) stream.$(O) file.$(O) \
 	nfa.$(O) dfa.$(O) conv.$(O) version.$(O) conf.$(O) lv.$(O) \
 	console.$(O) guesslocale.$(O)
 UNIOBJS = utf.$(O) unimap.$(O) unirev.$(O)
+WIN32OBJS = iscygpty.$(O)
 
 all: lv.exe
 
-lv.exe: $(OBJS) $(UNIOBJS)
-	$(CC) -o $@ $(OBJS) $(UNIOBJS) $(LIBS)
+lv.exe: $(OBJS) $(UNIOBJS) $(WIN32OBJS)
+	$(CC) -o $@ $(OBJS) $(UNIOBJS) $(WIN32OBJS) $(LIBS)
 
 .c.$(O):
 	$(CC) $(CFLAGS) -c $<
@@ -84,7 +85,7 @@ itable.$(O): itable.c itable.h
 
 kana.$(O): kana.c kana.h decode.h
 
-lv.$(O): lv.c conv.h itable.h ctable.h file.h console.h command.h version.h find.h encode.h uty.h istr.h decode.h re.h unimap.h display.h
+lv.$(O): lv.c conv.h itable.h ctable.h file.h console.h command.h version.h find.h encode.h uty.h istr.h decode.h re.h unimap.h display.h iscygpty.h
 
 nfa.$(O): nfa.c nfa.h itable.h re.h uty.h
 
@@ -107,6 +108,8 @@ utf.$(O): utf.c utf.h decode.h escape.h encode.h unirev.h
 uty.$(O): uty.c uty.h itable.h
 
 version.$(O): version.c version.h
+
+iscygpty.$(O): iscygpty.c iscygpty.h
 
 #
 # big5-cns map files
