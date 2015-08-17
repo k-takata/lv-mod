@@ -244,6 +244,9 @@ public int main( int argc, char **argv )
   Conf( conf, (unsigned char **)argv );
 
   if( ( NULL == conf->file && IsAtty( 0 ) )
+#ifdef _WIN32
+     || ( NULL == conf->file && is_cygpty( 0 ) )
+#endif /* _WIN32 */
      || ( TRUE == grep_mode && NULL == conf->pattern ) ){
     Banner();
     exit( -1 );
@@ -284,7 +287,7 @@ public int main( int argc, char **argv )
   } else if( is_cygpty( 1 ) ){
     fprintf( stderr, "lv: Output to Cygwin/MSYS pty is not supported.\n" );
     exit( 1 );
-#endif
+#endif /* _WIN32 */
   } else {
     LvConv( conf );
   }
