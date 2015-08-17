@@ -59,6 +59,7 @@
 #include <attr.h>
 #include <begin.h>
 #include <console.h>
+#include <uty.h>
 
 #define ANSI_ATTR_LENGTH	8
 

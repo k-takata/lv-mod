@@ -11,7 +11,7 @@ SHELL = /bin/sh
 
 # Windows (MinGW)
 CC = gcc
-CFLAGS = -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1 -DUSE_UNICODE_IO -DHAVE_FSEEKO=1
+CFLAGS = -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1 -DUSE_UNICODE_IO -DHAVE_FSEEKO=1 -DHAVE_UNISTD_H=1
 LIBS = -lkernel32
 O = o
 
@@ -39,7 +39,7 @@ command.$(O): command.c command.h itable.h istr.h encode.h decode.h find.h scree
 
 conf.$(O): conf.c conf.h itable.h unimap.h find.h display.h guess.h console.h file.h kana.h decode.h command.h conv.h uty.h version.h guesslocale.h
 
-console.$(O): console.c console.h ascii.h attr.h
+console.$(O): console.c console.h ascii.h attr.h uty.h
 
 conv.$(O): conv.c conv.h file.h encode.h decode.h uty.h find.h
 
