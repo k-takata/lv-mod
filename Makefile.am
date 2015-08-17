@@ -63,3 +63,5 @@ EXTRA_DIST += \
 	src/revgb.pl \
 	src/revksc.pl
 
+$(srcdir)/lv.hlp: $(srcdir)/lv.1
+	nroff -c -mandoc $< > $@
