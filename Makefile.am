@@ -2,7 +2,11 @@
 # Makefile for lv
 ########################################################################
 
+lvlibdir=	$(libdir)/lv
+
 SUBDIRS = src
+
+man1_MANS = lv.1
 
 EXTRA_DIST = .editorconfig .gitignore GPL.txt hello.sample hello.sample.gif \
 	     index.html lv.1 lv.hlp README.md relnote.html build/README.txt
@@ -65,3 +69,20 @@ EXTRA_DIST += \
 
 $(srcdir)/lv.hlp: $(srcdir)/lv.1
 	nroff -c -mandoc $< > $@
+
+install-exec-hook:
+	if test -f $(DESTDIR)$(bindir)/lgrep$(EXEEXT); then \
+		/bin/rm -f $(DESTDIR)$(bindir)/lgrep$(EXEEXT); \
+	fi
+	(cd $(DESTDIR)$(bindir) && \
+		$(LN_S) lv$(EXEEXT) lgrep$(EXEEXT))
+	if test ! -d $(DESTDIR)$(lvlibdir); then \
+		mkdir -p $(DESTDIR)$(lvlibdir); \
+	fi
+	$(INSTALL) -m 444 $(srcdir)/lv.hlp $(DESTDIR)$(lvlibdir)
+
+uninstall-hook:
+	(cd $(DESTDIR)$(bindir) && \
+		/bin/rm -f lgrep$(EXEEXT))
+	(cd $(DESTDIR)$(lvlibdir) && \
+		/bin/rm -f lv.hlp)
