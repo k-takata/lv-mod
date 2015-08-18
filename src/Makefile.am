@@ -7,16 +7,16 @@ CFLAGS=	@CFLAGS@ -DLV_HELP_PATH=\"$(lvlibdir)\" -I$(srcdir) @DEFS@
 
 bin_PROGRAMS = lv
 
-include_HEADERS = ascii.h attr.h begin.h big5.h boolean.h command.h conf.h \
-		  console.h conv.h ctable.h ctable_e.h ctable_t.h decode.h \
-		  dfa.h display.h encode.h escape.h eucjapan.h fetch.h \
-		  file.h find.h guess.h guesslocale.h hz.h ichar.h import.h \
-		  iso2022.h iso2cn.h iso2jp.h iso2kr.h iso8859.h istr.h \
-		  itable.h itable_e.h itable_t.h kana.h keybind.h nfa.h \
-		  position.h raw.h re.h screen.h shiftjis.h str.h stream.h \
-		  unimap.h unirev.h utf.h uty.h version.h
+lv_SOURCES = ascii.h attr.h begin.h big5.h boolean.h command.h conf.h \
+	console.h conv.h ctable.h ctable_e.h ctable_t.h decode.h \
+	dfa.h display.h encode.h escape.h eucjapan.h fetch.h \
+	file.h find.h guess.h guesslocale.h hz.h ichar.h import.h \
+	iso2022.h iso2cn.h iso2jp.h iso2kr.h iso8859.h istr.h \
+	itable.h itable_e.h itable_t.h kana.h keybind.h nfa.h \
+	position.h raw.h re.h screen.h shiftjis.h str.h stream.h \
+	unimap.h unirev.h utf.h uty.h version.h
 
-lv_SOURCES = itable.c ctable.c uty.c istr.c stream.c file.c guess.c decode.c \
+lv_SOURCES += itable.c ctable.c uty.c istr.c stream.c file.c guess.c decode.c \
 	encode.c escape.c iso2022.c iso8859.c iso2cn.c iso2jp.c iso2kr.c \
 	kana.c eucjapan.c shiftjis.c big5.c hz.c raw.c \
 	fetch.c screen.c command.c display.c find.c re.c \
@@ -26,8 +26,7 @@ lv_SOURCES += utf.c unimap.c unirev.c
 
 # MinGW specific sources
 if MINGW
-include_HEADERS += iscygpty.h
-lv_SOURCES += iscygpty.c
+lv_SOURCES += iscygpty.h iscygpty.c
 endif
 
 
