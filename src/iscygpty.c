@@ -57,6 +57,9 @@ int is_cygpty(int fd)
 	WCHAR *p = NULL;
 
 	h = (HANDLE) _get_osfhandle(fd);
+	if (h == INVALID_HANDLE_VALUE) {
+		return 0;
+	}
 	/* Cygwin/msys's pty is a pipe. */
 	if (GetFileType(h) != FILE_TYPE_PIPE) {
 		return 0;
