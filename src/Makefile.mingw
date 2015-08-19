@@ -200,7 +200,7 @@ iso88599.rev:
 #
 
 clean:
-	for file in lv.exe $(OBJS) $(UNIOBJS) ; \
+	for file in lv.exe $(OBJS) $(UNIOBJS) $(WIN32OBJS) ; \
 	do \
 		if [ -f $$file ]; then rm $$file ; fi \
 	done

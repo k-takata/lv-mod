@@ -208,4 +208,4 @@ iso88599.rev:
 #
 
 clean:
-	-DEL /F /Q lv.exe $(OBJS) $(UNIOBJS) *.pdb
+	-DEL /F /Q lv.exe $(OBJS) $(UNIOBJS) $(WIN32OBJS) *.pdb
