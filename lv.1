@@ -55,7 +55,7 @@ so an EUC fragment, for example,
 can be found in the ISO 2022 tailored streams, of course.
 .IP "\fISupporting the Unicode standard\fP"
 lv provides Unicode facilities
-which enables you to handle Unicode streams encoded in UTF-7 or UTF-8,
+which enables you to handle Unicode streams encoded in UTF-7, UTF-8 or UTF-16,
 and lv can also convert their code-points
 between Unicode and other charsets.
 So you can display Unicode or foreign texts on your terminal,
@@ -117,6 +117,10 @@ s: shift-jis
 b: big5
 .br
 h: HZ
+.br
+wa: UTF-16
+.br
+wb,wl: UTF-16BE,LE
 .br
 r: raw mode
 .IP "Examples:"

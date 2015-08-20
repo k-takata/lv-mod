@@ -126,8 +126,8 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@ -DLV_HELP_PATH=\"$(lvlibdir)\" -I$(srcdir) @DEFS@ \
-	$(am__append_1)
+CFLAGS = @CFLAGS@ -DLV_HELP_PATH=\"$(lvlibdir)\" -I$(srcdir) \
+	-DUSE_UTF16 @DEFS@ $(am__append_1)
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@

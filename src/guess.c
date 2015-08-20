@@ -72,6 +72,51 @@ static int isUTF8( byte *str, int length )
 }
 #endif /* MSDOS */
 
+#ifdef USE_UTF16
+private int isUTF16( byte *str, int length )
+{
+  int i;
+  byte ch1, ch2;
+  int le_score = 0;
+  int be_score = 0;
+
+  if( length < 2 )
+    return 0;
+
+  /* check BOM */
+  if( length >= 3 && str[0] == 0xef && str[1] == 0xbb && str[2] == 0xbf )
+    return 0; /* with UTF8-BOM */
+  if( str[0] == 0xfe && str[1] == 0xff )
+    return UTF_16BE;
+  if( str[0] == 0xff && str[1] == 0xfe )
+    return UTF_16LE;
+  for( i = 0; i < length-1; i += 2 ){
+    if( str[i] == 0 ){
+      if( str[i+1] == SP || str[i+1] == HT ||
+	  str[i+1] == CR || str[i+1] == LF ){
+	be_score += 3;
+      }
+      else if( str[i+1] < DEL ){
+	be_score++;
+      }
+    } else if( str[i+1] == 0 ){
+      if( str[i] == SP || str[i] == HT ||
+	  str[i] == CR || str[i] == LF ){
+	le_score += 3;
+      }
+      else if( str[i] < DEL ){
+	le_score++;
+      }
+    }
+  }
+  if( be_score > le_score*5 && be_score*5 > length )
+    return UTF_16BE;
+  if( le_score > be_score*5 && le_score*5 > length )
+    return UTF_16LE;
+  return 0;
+}
+#endif /* USE_UTF16 */
+
 private byte GuessCodingSystem_EastAsia( byte *str, int length,
 					 byte defaultEuc, char *language )
 {
@@ -220,6 +265,14 @@ public byte GuessCodingSystem( byte *str, int length, byte defaultEuc )
     use_locale = 0;
 
   if (use_locale) {
+#ifdef USE_UTF16
+    /*
+     * UTF16 can detect by BOM
+     */
+    i = isUTF16( str, length );
+    if( i != 0 )
+      return i;
+#endif /* USE_UTF16 */
 #ifndef MSDOS /* IF NOT DEFINED */
     /*
      * Since UTF-8 is a strict coding system, it is unlikely that
@@ -277,6 +330,14 @@ public byte GuessCodingSystem( byte *str, int length, byte defaultEuc )
   } else
 #endif /* HAVE_SETLOCALE */
   {
+#ifdef USE_UTF16
+    /*
+     * UTF16 can detect by BOM
+     */
+    i = isUTF16( str, length );
+    if( i != 0 )
+      return i;
+#endif /* USE_UTF16 */
 #ifndef MSDOS /* IF NOT DEFINED */
     /*
      * Since UTF-8 is a strict coding system, it is unlikely that
@@ -332,7 +393,26 @@ public void AdjustPatternCharset( byte inputCodingSystem,
   if( FALSE == adjust_charset )
     return;
 
-#ifndef MSDOS /* IF NOT DEFINED */
+#ifdef USE_UTF16
+  if( IsUtfEncoding( inputCodingSystem ) ||
+      IsUtf16Encoding( inputCodingSystem ) ||
+      IsUtfEncoding( keyboardCodingSystem ) ||
+      IsUtf16Encoding( keyboardCodingSystem ) ){
+    if( (IsUtfEncoding( inputCodingSystem ) ||
+	 IsUtf16Encoding( inputCodingSystem )) &&
+       !(IsUtfEncoding( keyboardCodingSystem ) ||
+	 IsUtf16Encoding( keyboardCodingSystem )))
+      ConvertToUNI( istr );
+    else if( !(IsUtfEncoding( inputCodingSystem ) ||
+	       IsUtfEncoding( inputCodingSystem ) ) &&
+	      (IsUtfEncoding( keyboardCodingSystem ) ||
+	       IsUtfEncoding( keyboardCodingSystem ) ) ){
+      if( AUTOSELECT == inputCodingSystem )
+	inputCodingSystem = defaultCodingSystem;
+      ConvertFromUNI( istr, inputCodingSystem );
+    }
+  } else
+#elif !defined(MSDOS) /* IF NOT DEFINED */
   if( IsUtfEncoding( inputCodingSystem ) || IsUtfEncoding( keyboardCodingSystem ) ){
     if( IsUtfEncoding( inputCodingSystem ) && !IsUtfEncoding( keyboardCodingSystem ) )
       ConvertToUNI( istr );
