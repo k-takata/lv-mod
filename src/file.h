@@ -179,7 +179,7 @@ public void FileInit();
 public inline int IobufGetc( iobuf_t *iobuf );
 public inline int IobufUngetc( int ch, iobuf_t *iobuf );
 public offset_t IobufFtell( iobuf_t *iobuf );
-public int IobufFseeko( iobuf_t *iobuf, offset_t off, int mode );
+public int IobufFseek( iobuf_t *iobuf, offset_t off, int mode );
 public int IobufFeof( iobuf_t *iobuf );
 #endif
 #define IobufPutc( a, b )	putc( a, (b)->iop )
