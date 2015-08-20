@@ -81,8 +81,8 @@ typedef struct {
 
 #if defined( _MSC_VER ) && _MSC_VER >= 1400
 #define HAVE_FSEEKO
-#define	off_t	__int64
-#define ftello( a )			_ftelli64( a )
+#define off_t	__int64
+#define ftello( a )		_ftelli64( a )
 #define fseeko( a, b, c )	_fseeki64( a, b, c )
 #endif /* _MSC_VER */
 
