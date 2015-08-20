@@ -4,6 +4,9 @@
 
 lvlibdir=	$(libdir)/lv
 CFLAGS=	@CFLAGS@ -DLV_HELP_PATH=\"$(lvlibdir)\" -I$(srcdir) @DEFS@
+if MINGW
+CFLAGS += -DUSE_UNICODE_IO
+endif
 
 bin_PROGRAMS = lv
 

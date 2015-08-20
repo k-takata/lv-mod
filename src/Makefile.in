@@ -55,10 +55,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@MINGW_TRUE@am__append_1 = -DUSE_UNICODE_IO
 bin_PROGRAMS = lv$(EXEEXT)
 
 # MinGW specific sources
-@MINGW_TRUE@am__append_1 = iscygpty.h iscygpty.c
+@MINGW_TRUE@am__append_2 = iscygpty.h iscygpty.c
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -125,7 +126,8 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@ -DLV_HELP_PATH=\"$(lvlibdir)\" -I$(srcdir) @DEFS@
+CFLAGS = @CFLAGS@ -DLV_HELP_PATH=\"$(lvlibdir)\" -I$(srcdir) @DEFS@ \
+	$(am__append_1)
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -228,7 +230,7 @@ lv_SOURCES = ascii.h attr.h begin.h big5.h boolean.h command.h conf.h \
 	iso2cn.c iso2jp.c iso2kr.c kana.c eucjapan.c shiftjis.c big5.c \
 	hz.c raw.c fetch.c screen.c command.c display.c find.c re.c \
 	nfa.c dfa.c conv.c version.c conf.c lv.c console.c \
-	guesslocale.c utf.c unimap.c unirev.c $(am__append_1)
+	guesslocale.c utf.c unimap.c unirev.c $(am__append_2)
 CJKINFURL = ftp://ftp.ora.com/pub/examples/nutshell/cjkv/doc/
 
 #
