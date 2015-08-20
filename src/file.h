@@ -68,6 +68,7 @@ typedef struct {
   i_str_t	*pattern;
   boolean_t	first;
   boolean_t	displayed;
+  boolean_t	before_direction;
 } find_t;
 
 typedef struct {

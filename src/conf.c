@@ -155,6 +155,7 @@ private void ConfInitArgs( conf_t *conf )
   kana_conv		= FALSE;	/* kana.h */
   smooth_paging		= FALSE;	/* display.h */
   hz_detection		= FALSE;	/* decode.h */
+  less_compatible	= FALSE;	/* command.h */
 
   ConsoleResetAnsiSequence();
 }
@@ -335,6 +336,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
       case 'n': line_number = TRUE; s++; continue;
       case 'q': no_scroll = FALSE; s++; continue;
       case 's': smooth_paging = TRUE; s++; continue;
+      case 't': less_compatible = TRUE; s++; continue;
       case 'u': allow_unify = TRUE; s++; continue;
       case 'v': grep_inverted = TRUE; s++; continue;
       case 'z': hz_detection = TRUE; s++; continue;
@@ -386,6 +388,7 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
 	case 'n': line_number = FALSE; s++; continue;
 	case 'q': no_scroll = TRUE; s++; continue;
 	case 's': smooth_paging = FALSE; s++; continue;
+	case 't': less_compatible = FALSE; s++; continue;
 	case 'u': allow_unify = FALSE; s++; continue;
 	case 'v': grep_inverted = FALSE; s++; continue;
 	case 'z': hz_detection = FALSE; s++; continue;
