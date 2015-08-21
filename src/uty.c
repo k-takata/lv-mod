@@ -218,7 +218,7 @@ public boolean_t IsAtty( int fd )
      * carry flag was set
      */
     if( 0x0006 == regs.x.ax )
-      fprintf( stderr, "lv: file descripter %d is not opend\n" );
+      fprintf( stderr, "lv: file descriptor %d is not opened\n" );
     else
       fprintf( stderr, "lv: device io control for fd:%d failed\n", fd );
     exit( -1 );

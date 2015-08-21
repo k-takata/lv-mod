@@ -51,7 +51,7 @@ extern byte *FindResetPattern( file_t *f, i_str_t *istr );
 
 private byte short_str[ LOAD_SIZE ];
 
-#ifndef MSDOS /* if NOT defned */
+#ifndef MSDOS /* if NOT defined */
 #define LOAD_COUNT	8		/* upper logical length 8Kbytes */
 #else
 #define LOAD_COUNT	1

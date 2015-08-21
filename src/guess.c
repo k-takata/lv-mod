@@ -223,7 +223,7 @@ public byte GuessCodingSystem( byte *str, int length, byte defaultEuc )
 #ifndef MSDOS /* IF NOT DEFINED */
     /*
      * Since UTF-8 is a strict coding system, it is unlikely that
-     * a non-UTF-8 file is accidently recognized as a UTF-8 file.
+     * a non-UTF-8 file is accidentally recognized as a UTF-8 file.
      * Thus, UTF-8 test is performed first regardless of locale.
      */
     if( 1 == isUTF8( str, length ) )
@@ -255,7 +255,7 @@ public byte GuessCodingSystem( byte *str, int length, byte defaultEuc )
     if( UTF_8 != defaultEuc && AUTOSELECT != defaultEuc )
       /*
        * If the user has a certain preference on coding system,
-       * the will is repected.  However, it is already known that
+       * the will is respected.  However, it is already known that
        * the file is not UTF-8.
        */
       return defaultEuc;
@@ -280,7 +280,7 @@ public byte GuessCodingSystem( byte *str, int length, byte defaultEuc )
 #ifndef MSDOS /* IF NOT DEFINED */
     /*
      * Since UTF-8 is a strict coding system, it is unlikely that
-     * a non-UTF-8 file is accidently recognized as a UTF-8 file.
+     * a non-UTF-8 file is accidentally recognized as a UTF-8 file.
      * Thus, UTF-8 test is performed first regardless of locale.
      */
     if( 1 == isUTF8( str, length ) )

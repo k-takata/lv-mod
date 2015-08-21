@@ -626,7 +626,7 @@ public void ConsoleReturnToProgram()
 
 public void ConsoleSuspend()
 {
-#if !defined( MSDOS ) && !defined( _WIN32 ) /* if NOT defind */
+#if !defined( MSDOS ) && !defined( _WIN32 ) /* if NOT defined */
   kill(0, SIGSTOP);	/*to pgrp*/
 #endif
 }
