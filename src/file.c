@@ -72,8 +72,13 @@ public void FileFreeLine( file_t *f )
 }
 
 #ifdef USE_INTERNAL_IOBUF
-public inline int IobufGetc( iobuf_t *iobuf )
+public INLINE int IobufGetc( iobuf_t *iobuf )
 {
+  if( iobuf->ungetc != EOF ){
+    int ch = iobuf->ungetc;
+    iobuf->ungetc = EOF;
+    return ch;
+  }
   if( iobuf->cur >= iobuf->last ){
     /* no stream buffer, reset and fill now */
     iobuf->cur = 0;
@@ -85,11 +90,14 @@ public inline int IobufGetc( iobuf_t *iobuf )
   return iobuf->buf[ iobuf->cur++ ];
 }
 
-public inline int IobufUngetc( int ch, iobuf_t *iobuf )
+public INLINE int IobufUngetc( int ch, iobuf_t *iobuf )
 {
   if( iobuf->cur == 0 ){
     /* XXX: it should be tied to fp sanely */
-    return EOF;
+    if( iobuf->ungetc != EOF )
+      return EOF;
+    iobuf->ungetc = ch;
+    return ch;
   }
   iobuf->buf[ --iobuf->cur ] = (byte)ch;
   return ch;
@@ -103,6 +111,8 @@ public offset_t IobufFtell( iobuf_t *iobuf )
 # else
   ptr = ftell( iobuf->iop );
 # endif
+  if( iobuf->ungetc != EOF )
+    ptr--;
   if( iobuf->cur == iobuf->last ){
     return ptr;
   }
@@ -112,6 +122,7 @@ public offset_t IobufFtell( iobuf_t *iobuf )
 public int IobufFseek( iobuf_t *iobuf, offset_t off, int mode )
 {
   iobuf->cur = iobuf->last = 0;  /* flush all iobuf */
+  iobuf->ungetc = EOF;
 # ifdef HAVE_FSEEKO
   return fseeko( iobuf->iop, off, mode );
 # else
@@ -593,8 +604,10 @@ public file_t *FileAttach( byte *fileName, stream_t *st,
 #ifdef USE_INTERNAL_IOBUF
   f->fp.cur		= 0;
   f->fp.last		= 0;
+  f->fp.ungetc		= EOF;
   f->sp.cur		= 0;
   f->sp.last		= 0;
+  f->sp.ungetc		= EOF;
 #endif
   f->pid		= st->pid;
   f->lastSegment	= 0;
