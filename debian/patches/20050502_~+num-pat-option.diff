@@ -1,6 +1,6 @@
-2005-05-02  GOTO Masanori  <gotom@debian.or.jp>
-
-	* Add +num and +/pat option.
+Description: Add +num and +/pat option
+Authot: GOTO Masanori  <gotom@debian.or.jp>
+Last-Update: 2005-05-02
 
 diff -Nuarp lv451/lv.1 lv451.gotom.+num/lv.1
 --- lv451/lv.1	2004-01-16 21:23:33.000000000 +0900

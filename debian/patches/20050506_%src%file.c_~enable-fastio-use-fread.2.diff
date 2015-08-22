@@ -1,3 +1,8 @@
+Description: Improve large file processing performance over typically +40% to
+ +300%.
+Author: GOTO Masanori <gotom@debian.org>
+Last-Update: 2005-05-06
+
 diff -Nuarp -x Makefile -x 'gmon*' -x 'profile*' -x 'lv-*' lv451/src/command.c lv451.gotom/src/command.c
 --- lv451/src/command.c	2004-01-05 16:42:31.000000000 +0900
 +++ lv451.gotom/src/command.c	2005-05-06 21:27:02.000000000 +0900

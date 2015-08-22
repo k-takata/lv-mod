@@ -2,13 +2,16 @@ Source: lv
 Section: text
 Priority: optional
 Maintainer: GOTO Masanori <gotom@debian.org>
-Build-Depends: debhelper (>> 4.0.0), libncurses5-dev
-Standards-Version: 3.6.0
+Build-Depends: debhelper (>= 9), libncurses5-dev, dh-autoreconf
+Standards-Version: 3.9.6
+Homepage: http://www.ff.iij4u.or.jp/~nrt/lv/
+Vcs-Git: git://anonscm.debian.org/collab-maint/lv.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/lv.git
 
 Package: lv
 Architecture: any
-Depends: ${shlibs:Depends}
-Recommends: bzip2
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: bzip2, xz-utils
 Description:  Powerful Multilingual File Viewer
  lv is a powerful file viewer like less.
  lv can decode and encode multilingual streams through

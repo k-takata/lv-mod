@@ -1,3 +1,45 @@
+lv (4.51-2.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * replace sigvec usage (Closes: #769546).
+    - debian/patches/sigvec.patch: new file. thanks to Florian Weimer
+      <fweimer@redhat.com>.
+    - debian/rules: enable autoreconf add-on.
+    - debian/autoreconf: set subdir.
+    - debian/control: Depends: dh-autoreconf.
+  * bump up Standards-Version 3.9.6
+
+ -- HIGUCHI Daisuke (VDR dai) <dai@debian.org>  Mon, 27 Apr 2015 21:43:39 +0900
+
+lv (4.51-2.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * debian/control, debian/rules, debian/compat: use dh9.
+  * debian/control
+    - add Vcs-* tags.
+    - add Homepage: tag.
+    - add ${misc:Depends} to Depends:.
+    - add xz-utils to Recommends:.
+  * debian/source/format: set 3.0 (quilt).
+  * debian/patches/*: rename from debian/patch* and add DEP-3 headers.
+  * debian/copyright: convert to DEP-5.
+  * debian/patches/fix-hyphen-used-as-minus-sign.diff: new file.
+  * debian/lv.doc-base: new file.
+  * bump up Standards-Version 3.9.5
+
+ -- HIGUCHI Daisuke (VDR dai) <dai@debian.org>  Sat, 15 Mar 2014 03:42:28 +0900
+
+lv (4.51-2.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Add 1 patch:
+    - debian/@patch.lv.660358.diff: support automatic xz and lzma
+      decompression. thanks to "A. N. Other" <a.n.other.debian@gmail.com>.
+      (Closes: #660358)
+  * debian/watch: Add. thanks to Bart Martens <bartm@debian.org>.
+
+ -- HIGUCHI Daisuke (VDR dai) <dai@debian.org>  Thu, 03 Oct 2013 21:42:15 +0900
+
 lv (4.51-2) unstable; urgency=low
 
   * Add 3 (+1) patches:

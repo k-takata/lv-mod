@@ -1,4 +1,6 @@
-2005-10-30  GOTO Masanori  <gotom@sanori.org>
+Description: Update copyright year to 2005.  Support large file.
+Author: GOTO Masanori  <gotom@sanori.org>
+Last-Update: 2005-10-30
 
 	* src/command.c: Use offset_t typedef for encapsulating
 	long vs long long on 32bit LFS systems.
