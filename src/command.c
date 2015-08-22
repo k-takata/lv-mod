@@ -841,23 +841,29 @@ private void CommandNextPage( unsigned int arg )
 private void CommandRepeatForward( unsigned int arg )
 {
   if( NULL != f->find.pattern )
-    message = CommandFindContinue( f, FORWARD );
+    message = CommandFindContinue( f,
+      ( less_compatible && f->find.before_direction == BACKWARD )
+	? BACKWARD : FORWARD );
 }
 
 private void CommandRepeatBackward( unsigned int arg )
 {
   if( NULL != f->find.pattern )
-    message = CommandFindContinue( f, BACKWARD );
+    message = CommandFindContinue( f,
+      ( less_compatible && f->find.before_direction == BACKWARD )
+	? FORWARD : BACKWARD );
 }
 
 private void CommandFindForward( unsigned int arg )
 {
   message = CommandFindSetPattern( f, FORWARD );
+  f->find.before_direction = FORWARD;
 }
 
 private void CommandFindBackward( unsigned int arg )
 {
   message = CommandFindSetPattern( f, BACKWARD );
+  f->find.before_direction = BACKWARD;
 }
 
 private void CommandFileStatus( unsigned int arg )

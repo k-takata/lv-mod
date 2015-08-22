@@ -196,7 +196,8 @@ utfContinue:
 	  if( 0x80 == ( 0xc0 & ch ) ){
 	    /* trailor */
 	    uni |= (ic_t)( 0x3f & ch );
-	    DecodeAddUnicode( state->attr, uni );
+	    if( uni != UNICODE_BOM )
+	      DecodeAddUnicode( state->attr, uni );
 	  }
 	}
       } else {
@@ -339,3 +340,96 @@ public void EncodeUTF8( i_str_t *istr, int head, int tail,
     }
   }
 }
+
+#ifdef USE_UTF16
+public void DecodeUTF16( state_t *state, byte codingSystem )
+{
+  byte ch1, ch2; /* hibyte, lobyte */
+  ic_t uni;
+
+  for( ; ; ){
+    if( UTF_16 == codingSystem ){
+      GetChar( ch1 );
+      GetChar( ch2 );
+      uni = (ic_t)(( ch1 << 8 ) | ch2);
+      if( uni == UNICODE_BOM ){
+	codingSystem = UTF_16BE;
+	continue;
+      }
+      uni = (ic_t)(( ch2 << 8 ) | ch1);
+      if( uni == UNICODE_BOM ){
+	codingSystem = UTF_16LE;
+	continue;
+      }
+      /* fallthru assume UTF_16BE */
+    } else if( UTF_16LE == codingSystem ){
+      GetChar( ch2 );
+      GetChar( ch1 );
+    } else {
+      GetChar( ch1 );
+      GetChar( ch2 );
+    }
+
+    if( ch1 == 0 && ch2 <= SP ){
+      if( SP == ch2 )
+	DecodeAddSpace( state->attr );
+#if 0
+      else if( ESC == ch2 ){
+	if( FALSE == DecodeEscape( state ) )
+	  break;
+      }
+#endif
+      else if( HT == ch2 )
+	DecodeAddTab( state->attr );
+      else if( BS == ch2 )
+	DecodeAddBs();
+      else
+	DecodeAddControl( ch2 );
+    } else if( ch1 == 0 && ch2 < (ic_t)DEL ){
+      DecodeAddIchar( ASCII, (ic_t)ch2, state->attr );
+    } else {
+      uni = (ic_t)(( ch1 << 8 ) | ch2);
+      if( uni != UNICODE_BOM )
+	DecodeAddUnicode( state->attr, uni );
+    }
+  }
+}
+
+public void EncodeUTF16( i_str_t *istr, int head, int tail,
+			byte codingSystem, boolean_t binary )
+{
+  int idx, attr;
+  ic_t ic;
+  byte cset;
+
+  for( idx = head ; idx < tail ; idx++ ){
+    cset = istr[ idx ].charset;
+    ic = istr[ idx ].c;
+    attr = (int)istr[ idx ].attr << 8;
+    if( cset < PSEUDO ){
+      if( ASCII == cset ){
+	if( UTF_16LE == codingSystem ){
+	  EncodeAddChar( attr, ic );
+	  EncodeAddChar( attr, 0 );
+	} else {
+	  EncodeAddChar( attr, 0 );
+	  EncodeAddChar( attr, ic );
+	}
+      } else {
+	if( UNICODE != cset )
+	  ic = RevUNI( ic, &cset );
+	if( UTF_16LE == codingSystem ){
+	  EncodeAddChar( attr, 0xff & ic );
+	  EncodeAddChar( attr, ic >> 8 );
+	} else {
+	  EncodeAddChar( attr, ic >> 8 );
+	  EncodeAddChar( attr, 0xff & ic );
+	}
+      }
+    } else if( FALSE == EncodeAddPseudo16( attr, ic, cset, binary,
+					  UTF_16LE == codingSystem ) ){
+      break;
+    }
+  }
+}
+#endif /* USE_UTF16 */

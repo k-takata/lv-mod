@@ -68,6 +68,7 @@ typedef struct {
   i_str_t	*pattern;
   boolean_t	first;
   boolean_t	displayed;
+  boolean_t	before_direction;
 } find_t;
 
 typedef struct {
@@ -76,8 +77,18 @@ typedef struct {
   byte		buf[ IOBUF_DEFAULT_SIZE ];
   size_t	cur;
   size_t	last;
+  int		ungetc;
 #endif
 } iobuf_t;
+
+#if defined( __GNUC__ ) || \
+  ( defined( __STDC_VERSION__ ) && ( __STDC_VERSION__ >= 199901L ) )
+#define INLINE inline
+#elif defined( _MSC_VER )
+#define INLINE __inline
+#else
+#define INLINE
+#endif /* __GNUC__, __STDC_VERSION__ */
 
 #if defined( _MSC_VER ) && _MSC_VER >= 1400
 #define HAVE_FSEEKO
@@ -176,10 +187,10 @@ public void FileInit();
 # endif
 # define IobufFeof( a )		feof( (a)->iop )
 #else
-public inline int IobufGetc( iobuf_t *iobuf );
-public inline int IobufUngetc( int ch, iobuf_t *iobuf );
+public INLINE int IobufGetc( iobuf_t *iobuf );
+public INLINE int IobufUngetc( int ch, iobuf_t *iobuf );
 public offset_t IobufFtell( iobuf_t *iobuf );
-public int IobufFseeko( iobuf_t *iobuf, offset_t off, int mode );
+public int IobufFseek( iobuf_t *iobuf, offset_t off, int mode );
 public int IobufFeof( iobuf_t *iobuf );
 #endif
 #define IobufPutc( a, b )	putc( a, (b)->iop )

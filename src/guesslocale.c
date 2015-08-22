@@ -24,8 +24,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <ctype.h>
 #if defined(HAVE_LANGINFO_CODESET)
 #include <langinfo.h>
+#endif
+#ifdef _WIN32
+#include <windows.h>
 #endif
 
 #include <import.h>
@@ -48,9 +52,27 @@ static int strcmp2( char *str1, char *str2 )
 
 public byte LocaleCodingSystem( char *language )
 {
-#if defined( MSDOS ) || defined( _WIN32 )
+#if defined( MSDOS )
   strcpy( language, "ja_JP" );
   return SHIFT_JIS;
+#elif defined(_WIN32)
+  switch (GetUserDefaultUILanguage()) {
+  case 2052: /* Chinese (Simplified) */
+    strcpy( language, "zh_CN");
+    return HZ_GB; /* ??? */
+  case 1028: /* Chinese (Traditional) */
+    strcpy( language, "zh_TW");
+    return BIG_FIVE;
+  case 1041: /* Japanese */
+    strcpy( language, "ja_JP");
+    return SHIFT_JIS;
+  case 1042: /* Korean */
+    strcpy( language, "ko");
+    return EUC_KOREA;
+  }
+  /* ANSI is almost same as English? */
+  strcpy( language, "en" );
+  return ISO_8859_1;
 #elif !defined(HAVE_LANGINFO_CODESET)
 #warning "XXX There isn't nl_langinfo(CODESET) functionality."
 #warning "XXX Using fixed value ``ja_JP'' and EUC_JAPAN..."

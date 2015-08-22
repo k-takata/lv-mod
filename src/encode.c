@@ -76,7 +76,12 @@ private encode_table_t encodeTable[ C_TABLE_SIZE ] = {
   EncodeISO2022cn,		/* ISO_2022_CN */
   EncodeISO2022jp,		/* ISO_2022_JP */
   EncodeISO2022kr,		/* ISO_2022_KR */
-  EncodeRaw			/* RAW */
+  EncodeRaw,			/* RAW */
+#ifdef USE_UTF16
+  EncodeUTF16,			/* UTF16 (same of UTF16BE) */
+  EncodeUTF16,			/* UTF16LE */
+  EncodeUTF16,			/* UTF16BE */
+#endif
 };
 
 #define HexChar( c )	( (c) < 10 ? '0' + (c) : (c) + '7' )
@@ -119,6 +124,67 @@ public boolean_t EncodeAddPseudo( int attr, ic_t ic, byte cset,
 
   return TRUE;
 }
+
+#ifdef USE_UTF16
+public boolean_t EncodeAddPseudo16( int attr, ic_t ic, byte cset,
+				   boolean_t binary, boolean_t le )
+{
+  int i;
+  byte c;
+
+  if( LINE_FEED == cset ){
+    if (!le) EncodeAddCharRet( attr, 0 );
+    EncodeAddCharRet( attr, LF );
+    if (le) EncodeAddCharRet( attr, 0 );
+  } else if( SPACE == cset ){
+    if (!le) EncodeAddCharRet( attr, 0 );
+    EncodeAddCharRet( attr, SP );
+    if (le) EncodeAddCharRet( attr, 0 );
+  } else if( HTAB == cset ){
+    if( TRUE == binary ){
+      if (!le) EncodeAddCharRet( attr, 0 );
+      EncodeAddCharRet( attr, HT );
+      if (le) EncodeAddCharRet( attr, 0 );
+    } else {
+      for( i = 0 ; i < MakeByte1( ic ) ; i++ ) {
+	if (!le) EncodeAddCharRet( attr, 0 );
+	EncodeAddCharRet( attr, ' ' );
+	if (le) EncodeAddCharRet( attr, 0 );
+      }
+    }
+  } else if( CNTRL == cset ){
+    if( TRUE == binary ){
+      if (!le) EncodeAddCharRet( attr, 0 );
+      EncodeAddCharRet( attr, ic );
+      if (le) EncodeAddCharRet( attr, 0 );
+    } else {
+      c = MakeByte2( ic );
+      if( c < SP ){
+	if (!le) EncodeAddCharRet( attr, 0 );
+        EncodeAddCharRet( attr, '^' );
+	EncodeAddCharRet( attr, 0 );
+        EncodeAddCharRet( attr, '@' + c );
+	if (le) EncodeAddCharRet( attr, 0 );
+      } else if( c < DEL ){
+	if (!le) EncodeAddCharRet( attr, 0 );
+        EncodeAddCharRet( attr, c );
+	if (le) EncodeAddCharRet( attr, 0 );
+      } else {
+	if (!le) EncodeAddCharRet( attr, 0 );
+        EncodeAddCharRet( attr, '<' );
+	EncodeAddCharRet( attr, 0 );
+        EncodeAddCharRet( attr, HexChar( ( 0xf0 & c ) >> 4 ) );
+	EncodeAddCharRet( attr, 0 );
+        EncodeAddCharRet( attr, HexChar( ( 0x0f & c ) ) );
+	EncodeAddCharRet( attr, 0 );
+        EncodeAddCharRet( attr, '>' );
+	if (!le) EncodeAddCharRet( attr, 0 );
+      }
+    }
+  }
+  return TRUE;
+}
+#endif /* USE_UTF16 */
 
 public boolean_t EncodeAddInvalid( int attr, ic_t ic, byte cset )
 {

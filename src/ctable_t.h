@@ -47,7 +47,15 @@
 
 #define RAW			28	/* raw mode */
 
+#ifdef USE_UTF16
+#define UTF_16			29	/* UTF-16 (LE/BE autodetect) */
+#define UTF_16LE		30	/* UTF-16LE */
+#define UTF_16BE		31	/* UTF-16BE */
+
+#define C_TABLE_SIZE		32	/* pseudo coding system */
+#else /* USE_UTF16 */
 #define C_TABLE_SIZE		29	/* pseudo coding system */
+#endif /* USE_UTF16 */
 
 #define GL			0
 #define GR			1

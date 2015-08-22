@@ -10,6 +10,8 @@
 
 #include <file.h>
 
+public boolean_t less_compatible;
+
 public byte *editor_program;
 public byte *filter_program;
 

@@ -11,7 +11,7 @@ SHELL = cmd
 
 # Windows (MSVC)
 CC = cl
-CFLAGS = -nologo -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1 -DUSE_UNICODE_IO
+CFLAGS = -nologo -I. -DRETSIGTYPE=void -DHAVE_SETLOCALE=1 -DUSE_UNICODE_IO -DUSE_UTF16
 LDFLAGS = -nologo
 LIBS = kernel32.lib
 O = obj
