@@ -1,0 +1,92 @@
+Description: replace sigvec usage
+Author: Florian Weimer <fweimer@redhat.com>
+Bug-Debian: https://bugs.debian.org/769546
+Last-Update: 2014-11-14
+
+There are plans to turn sigvec (an obsolete signal handling interface) 
+into a compatibility symbol.  Existing builds will continue to work, but 
+new builds will need the attached patch, courtesy of Roland McGrath 
+<roland@hack.frob.com>.  See this discussion for more information:
+
+   <https://sourceware.org/ml/libc-alpha/2014-10/msg00090.html>
+
+Could apply this patch to the Debian package to make it more 
+future-proof, please?
+
+-- 
+Florian Weimer / Red Hat Product Security
+
+--- lv/src/configure.in.~1~	2004-01-04 22:35:44.000000000 -0800
++++ lv/src/configure.in	2014-10-09 11:14:47.782210631 -0700
+@@ -34,7 +34,7 @@ AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys
+ dnl Checks for typedefs, structures, and compiler characteristics.
+ 
+ dnl Checks for library functions.
+-AC_CHECK_FUNCS(sigvec tgetnum setlocale)
++AC_CHECK_FUNCS(sigaction tgetnum setlocale)
+ AC_FUNC_GETPGRP
+ AC_PROG_GCC_TRADITIONAL
+ AC_TYPE_SIGNAL
+--- lv/src/console.c.~1~	2004-01-04 23:27:46.000000000 -0800
++++ lv/src/console.c	2014-10-09 11:16:59.627943378 -0700
+@@ -158,9 +158,9 @@ private RETSIGTYPE InterruptHandler( int
+ {
+   kb_interrupted = TRUE;
+ 
+-#ifndef HAVE_SIGVEC
++#ifndef HAVE_SIGACTION
+   signal( SIGINT, InterruptHandler );
+-#endif /* HAVE_SIGVEC */
++#endif /* HAVE_SIGACTION */
+ }
+ 
+ public void ConsoleEnableInterrupt()
+@@ -235,9 +235,9 @@ private RETSIGTYPE WindowChangeHandler(
+ 
+   ConsoleGetWindowSize();
+ 
+-#ifndef HAVE_SIGVEC
++#ifndef HAVE_SIGACTION
+   signal( SIGWINCH, WindowChangeHandler );
+-#endif /* HAVE_SIGVEC */
++#endif /* HAVE_SIGACTION */
+ }
+ #endif /* UNIX */
+ 
+@@ -388,24 +388,24 @@ public void ConsoleSetUp()
+   signal( SIGINT, InterruptIgnoreHandler );
+ #endif /* MSDOS */
+ 
+-#ifdef HAVE_SIGVEC
+-  struct sigvec sigVec;
++#ifdef HAVE_SIGACTION
++  struct sigaction sa;
+ 
+-  sigVec.sv_handler = WindowChangeHandler;
+-  sigVec.sv_mask = sigmask( SIGWINCH );
+-  sigVec.sv_flags = SV_INTERRUPT;
+-  sigvec( SIGWINCH, &sigVec, NULL );
+-
+-  sigVec.sv_handler = InterruptHandler;
+-  sigVec.sv_mask = sigmask( SIGINT );
+-  sigVec.sv_flags = SV_INTERRUPT;
+-  sigvec( SIGINT, &sigVec, NULL );
++  sa.sa_handler = WindowChangeHandler;
++  sigemptyset( &sa.sa_mask );
++  sa.sa_flags = 0;           /* No SA_RESTART means interrupt syscalls.  */
++  sigaction( SIGWINCH, &sa, NULL );
++
++  sa.sa_handler = InterruptHandler;
++  sigemptyset( &sa.sa_mask );
++  sa.sa_flags = 0;           /* No SA_RESTART means interrupt syscalls.  */
++  sigaction( SIGINT, &sa, NULL );
+ #else
+ # ifdef SIGWINCH
+   signal( SIGWINCH, WindowChangeHandler );
+ # endif 
+   signal( SIGINT, InterruptHandler );
+-#endif /* HAVE_SIGVEC */
++#endif /* HAVE_SIGACTION */
+ 
+ #ifdef UNIX
+ #ifdef HAVE_TERMIOS_H

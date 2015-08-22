@@ -1,5 +1,10 @@
---- src/configure.gotom	2004-01-05 15:37:17.000000000 +0900
-+++ src/configure	2005-05-06 15:36:02.000000000 +0900
+Description: Enable to add +num and +/pattern option and improve large file
+ processing performance over typically +40% to +300%.
+Author: GOTO Masanori <gotom@debian.org>
+Last-Update: 2005-05-06
+
+--- lv/src/configure.gotom	2004-01-05 15:37:17.000000000 +0900
++++ lv/src/configure	2005-05-06 15:36:02.000000000 +0900
 @@ -13,6 +13,8 @@
  # Any additions from configure.in:
  ac_help="$ac_help
@@ -566,8 +571,8 @@
  trap '' 1 2 15
  cat > confcache <<\EOF
  # This file is a shell script that caches the results of configure
---- lv.hlp.gotom	2004-01-16 21:24:09.000000000 +0900
-+++ lv.hlp	2005-05-06 15:35:46.000000000 +0900
+--- lv/lv.hlp.gotom	2004-01-16 21:24:09.000000000 +0900
++++ lv/lv.hlp	2005-05-06 15:35:46.000000000 +0900
 @@ -1,4 +1,4 @@
 -LV(1)                                                       LV(1)
 +LV(1)                                                                    LV(1)

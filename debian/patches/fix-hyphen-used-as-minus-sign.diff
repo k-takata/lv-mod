@@ -1,0 +1,74 @@
+Description: fix hyphen-used-as-minus-sign
+Author: HIGUCHI Daisuke (VDR dai) <dai@debian.org>
+Last-Update: 2014-03-20
+
+--- lv/lv.1.mod	2014-03-20 22:24:41.000000000 +0900
++++ lv/lv.1	2014-03-20 22:25:46.272014803 +0900
+@@ -5,21 +5,21 @@
+ .B lv, lgrep
+ .br
+ .B lv
+--h
++\-h
+ .br
+ .B lv
+--V
++\-V
+ .br
+ .B lv
+-[-acdfgiklmnqsuvz] [+acdfgiklmnqsuvz]
++[\-acdfgiklmnqsuvz] [+acdfgiklmnqsuvz]
+ .br
+-     [-A\fIcoding-system\fP] [-I\fIcoding-system\fP] [-K\fIcoding-system\fP]
++     [\-A\fIcoding-system\fP] [\-I\fIcoding-system\fP] [\-K\fIcoding-system\fP]
+ .br
+-     [-O\fIcoding-system\fP] [-P\fIcoding-system\fP] [-D\fIcoding-system\fP]
++     [\-O\fIcoding-system\fP] [\-P\fIcoding-system\fP] [\-D\fIcoding-system\fP]
+ .br
+-     [-Ss\fIseq\fP] [-Sr\fIseq\fP] [-Sb\fIseq\fP] [-Su\fIseq\fP] [-Sh\fIseq\fP]
++     [\-Ss\fIseq\fP] [\-Sr\fIseq\fP] [\-Sb\fIseq\fP] [\-Su\fIseq\fP] [\-Sh\fIseq\fP]
+ .br
+-     [-T\fInumber\fP] [-W\fIwidth\fP] [-H\fIheight\fP] [-E'\fIeditor'\fP] [-+]
++     [\-T\fInumber\fP] [\-W\fIwidth\fP] [\-H\fIheight\fP] [\-E'\fIeditor'\fP] [\-+]
+ .br
+      [+\fInumber\fP] [+/\fIgrep-pattern\fP]
+ .br
+@@ -120,15 +120,15 @@
+ .br
+ r: raw mode
+ .IP "Examples:"
+--Il2: input coding system is iso-8859-2
++\-Il2: input coding system is iso-8859-2
+ .br
+--Ks:  keyboard coding system is shift-jis
++\-Ks:  keyboard coding system is shift-jis
+ .br
+--Oek: output coding system is euc-korea
++\-Oek: output coding system is euc-korea
+ .br
+--Ab:  all coding systems are big5
++\-Ab:  all coding systems are big5
+ .IP "Coding-system translations / Code-points conversions:"
+-iso-2022-cn, -jp, -kr can be converted into euc-china or -taiwan,
++iso-2022-cn, \-jp, \-kr can be converted into euc-china or \-taiwan,
+ euc-japan, euc-korea, respectively (and vice versa).
+ shift-jis uses the same internal code-points
+ as iso-2022-jp and euc-japan.
+@@ -153,7 +153,7 @@
+ .IP "-H<\fInumber\fP>"
+ Screen height
+ .IP "-E'<\fIeditor\fP>' (default 'vi -c %d')"
+-Editor name (default 'vi -c %d')
++Editor name (default 'vi \-c %d')
+ .br
+ ``%d'' means the line number of current position in a file.
+ .IP "-q"
+@@ -291,7 +291,7 @@
+ .IP "C-t:"
+ Toggle HZ decoding mode
+ .IP "v:"
+-Launch the editor defined by option -E
++Launch the editor defined by option \-E
+ .IP "C-g, =:"
+ Show file information (filename, position, coding system)
+ .IP "V:"

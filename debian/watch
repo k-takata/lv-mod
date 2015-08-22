@@ -1,0 +1,3 @@
+version=3
+opts=uversionmangle=s/^(\d)(\d\d)$/$1.$2/ \
+http://www.ff.iij4u.or.jp/~nrt/lv/ .*/lv(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))
