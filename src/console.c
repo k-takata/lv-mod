@@ -117,6 +117,12 @@ private HANDLE stdout_handle = NULL;
 private HANDLE console_handle = NULL;
 private DWORD initial_mode;
 private DWORD new_mode;
+typedef struct {
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  CONSOLE_CURSOR_INFO        cci;
+  PCHAR_INFO                 buffer;
+} console_buf_saved_t;
+private console_buf_saved_t old_console_buf;
 #endif /* _WIN32 */
 
 #ifdef UNIX
@@ -165,6 +171,73 @@ private char *keypad_xmit		= NULL;
 #endif /* TERMCAP */
 
 #ifdef _WIN32
+private void SaveConsoleBuffer( console_buf_saved_t *save )
+{
+  int        size;
+  COORD      pos;
+  SMALL_RECT region;
+  int        Y, incr;
+
+  SetLastError( NO_ERROR );
+  if ( !GetConsoleScreenBufferInfo( console_handle, &save->csbi ) )
+    return;
+  if ( !GetConsoleCursorInfo( console_handle, &save->cci ) )
+    return;
+  size = save->csbi.dwSize.X * save->csbi.dwSize.Y;
+  save->buffer = (PCHAR_INFO)Malloc( size * sizeof( CHAR_INFO ) );
+  pos.X = 0;
+  region.Left = 0;
+  region.Right = save->csbi.dwSize.X - 1;
+  incr = 12000 / save->csbi.dwSize.X;
+  for( Y = 0; Y < save->csbi.dwSize.Y; Y += incr ){
+    /*
+     * Read into position (0, Y) in our buffer.
+     */
+    pos.Y = Y;
+    /*
+     * Read the region whose top left corner is (0, Y) and whose bottom
+     * right corner is (width - 1, Y + incr - 1).  This should define
+     * a region of size width by incr.  Don't worry if this region is
+     * too large for the remaining buffer; it will be cropped.
+     * This code based on Vim 7.2
+     */
+    region.Top = Y;
+    region.Bottom = Y + incr - 1;
+    if( !ReadConsoleOutput( console_handle, save->buffer, save->csbi.dwSize,
+		pos, &region ) ) {
+      free( save->buffer );
+      save->buffer = NULL;
+      return;
+    }
+  }
+}
+
+private void RestoreConsoleBuffer( console_buf_saved_t *save )
+{
+  if( save->buffer ){
+    COORD      pos;
+    SMALL_RECT region;
+    pos.X = pos.Y = 0;
+    region.Top = region.Left = 0;
+    region.Bottom = save->csbi.dwSize.Y - 1;
+    region.Right = save->csbi.dwSize.X - 1;
+    if( !SetConsoleScreenBufferSize( console_handle, save->csbi.dwSize ) )
+      return;
+    if( !SetConsoleWindowInfo( console_handle, TRUE, &save->csbi.srWindow ) )
+      return;
+    if( !SetConsoleCursorPosition( console_handle,
+				   save->csbi.dwCursorPosition ) )
+      return;
+    if( !SetConsoleTextAttribute( console_handle, save->csbi.wAttributes ) )
+      return;
+    if( !WriteConsoleOutput( console_handle, save->buffer, save->csbi.dwSize,
+			     pos, &region ) )
+      return;
+    free( save->buffer );
+    save->buffer = NULL;
+  }
+}
+
 private WORD GetWin32Attribute( byte attr )
 {
   WORD attr_new = FOREGROUND_WHITE;
@@ -381,9 +454,7 @@ public void ConsoleTermInit()
 #ifdef _WIN32
   no_scroll		= FALSE;
 
-  console_handle = CreateConsoleScreenBuffer(
-      GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-      NULL, CONSOLE_TEXTMODE_BUFFER, NULL );
+  console_handle = GetStdHandle( STD_OUTPUT_HANDLE );
   ConsoleGetWindowSize();
 #endif /* _WIN32 */
 
@@ -491,6 +562,7 @@ public void ConsoleSetUp()
   COORD coord;
   DWORD written;
 
+  SaveConsoleBuffer( &old_console_buf );
   GetConsoleScreenBufferInfo( console_handle, &csbi );
   console_attr = csbi.wAttributes;
   rect = csbi.srWindow;
@@ -500,7 +572,7 @@ public void ConsoleSetUp()
   new_mode = initial_mode &
     ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT );
   SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), new_mode );
-  SetConsoleActiveScreenBuffer( console_handle );
+  ConsoleClearScreen();
 #endif /* _WIN32 */
 
 #ifdef HAVE_SIGACTION
@@ -554,11 +626,6 @@ public void ConsoleSetUp()
 
 public void ConsoleSetDown()
 {
-#ifdef _WIN32
-  CloseHandle( console_handle );
-  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), initial_mode );
-#endif /* _WIN32 */
-
 #ifdef UNIX
 #ifdef HAVE_TERMIOS_H
   tcsetattr( 0, TCSADRAIN, &ttyOld );
@@ -567,6 +634,10 @@ public void ConsoleSetDown()
 #endif /* HAVE_TERMIOS_H */
 #endif /* UNIX */
 
+#ifdef _WIN32
+  SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), initial_mode );
+  RestoreConsoleBuffer( &old_console_buf );
+#else /* _WIN32 */
   if( keypad_local )
     tputs( keypad_local, 1, putfunc );
   if( exit_ca_mode )
@@ -576,6 +647,7 @@ public void ConsoleSetDown()
     ConsolePrint( CR );
     ConsolePrint( LF );
   }
+#endif /* _WIN32 */
 }
 
 public void ConsoleShellEscape()
@@ -589,8 +661,8 @@ public void ConsoleShellEscape()
 #endif /* UNIX */
 
 #ifdef _WIN32
-  SetConsoleActiveScreenBuffer( GetStdHandle( STD_OUTPUT_HANDLE ) );
   SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), initial_mode );
+  RestoreConsoleBuffer( &old_console_buf );
 #else /* _WIN32 */
   if( keypad_local )
     tputs( keypad_local, 1, putfunc );
@@ -606,8 +678,8 @@ public void ConsoleShellEscape()
 public void ConsoleReturnToProgram()
 {
 #ifdef _WIN32
-  SetConsoleActiveScreenBuffer( console_handle );
   SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), new_mode );
+  SaveConsoleBuffer( &old_console_buf );
 #else /* _WIN32 */
   if( keypad_xmit )
     tputs( keypad_xmit, 1, putfunc );
