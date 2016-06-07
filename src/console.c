@@ -121,6 +121,7 @@ typedef struct {
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   CONSOLE_CURSOR_INFO        cci;
   PCHAR_INFO                 buffer;
+  WINDOWPLACEMENT            wndpl;
 } console_buf_saved_t;
 private console_buf_saved_t old_console_buf;
 #endif /* _WIN32 */
@@ -178,6 +179,7 @@ private void SaveConsoleBuffer( console_buf_saved_t *save )
   SMALL_RECT region;
   int        Y, incr;
 
+  GetWindowPlacement( GetConsoleWindow(), &save->wndpl );
   SetLastError( NO_ERROR );
   if ( !GetConsoleScreenBufferInfo( console_handle, &save->csbi ) )
     return;
@@ -217,10 +219,26 @@ private void RestoreConsoleBuffer( console_buf_saved_t *save )
   if( save->buffer ){
     COORD      pos;
     SMALL_RECT region;
+    HWND       hwnd;
+    RECT       rect;
+
     pos.X = pos.Y = 0;
     region.Top = region.Left = 0;
     region.Bottom = save->csbi.dwSize.Y - 1;
     region.Right = save->csbi.dwSize.X - 1;
+
+    /* Restore window size */
+    hwnd = GetConsoleWindow();
+    if( !IsZoomed( hwnd ) && !IsIconic( hwnd ) ){
+      /* Adjust window position */
+      RECT *rc_save = &save->wndpl.rcNormalPosition;
+      GetWindowRect( hwnd, &rect );
+      rect.right = rect.left + (rc_save->right - rc_save->left);
+      rect.bottom = rect.top + (rc_save->bottom - rc_save->top);
+      *rc_save = rect;
+    }
+    SetWindowPlacement( hwnd, &save->wndpl );
+
     if( !SetConsoleScreenBufferSize( console_handle, save->csbi.dwSize ) )
       return;
     if( !SetConsoleWindowInfo( console_handle, TRUE, &save->csbi.srWindow ) )
