@@ -121,6 +121,8 @@ typedef struct {
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   CONSOLE_CURSOR_INFO        cci;
   PCHAR_INFO                 buffer;
+  PSMALL_RECT                regions;
+  int                        num_region;
   WINDOWPLACEMENT            wndpl;
 } console_buf_saved_t;
 private console_buf_saved_t old_console_buf;
@@ -177,7 +179,7 @@ private void SaveConsoleBuffer( console_buf_saved_t *save )
   int        size;
   COORD      pos;
   SMALL_RECT region;
-  int        Y, incr;
+  int        Y, incr, i;
 
   GetWindowPlacement( GetConsoleWindow(), &save->wndpl );
   SetLastError( NO_ERROR );
@@ -187,11 +189,21 @@ private void SaveConsoleBuffer( console_buf_saved_t *save )
     return;
   size = save->csbi.dwSize.X * save->csbi.dwSize.Y;
   save->buffer = (PCHAR_INFO)Malloc( size * sizeof( CHAR_INFO ) );
+  if( NULL == save->buffer )
+    return;
   pos.X = 0;
   region.Left = 0;
   region.Right = save->csbi.dwSize.X - 1;
   incr = 12000 / save->csbi.dwSize.X;
-  for( Y = 0; Y < save->csbi.dwSize.Y; Y += incr ){
+  save->num_region = (save->csbi.dwSize.Y + incr - 1) / incr;
+  save->regions = (PSMALL_RECT)Malloc(
+      save->num_region * sizeof( SMALL_RECT ) );
+  if( NULL == save->regions ){
+    free( save->buffer );
+    save->buffer = NULL;
+    return;
+  }
+  for( i = 0, Y = 0; i < save->num_region; i++, Y += incr ){
     /*
      * Read into position (0, Y) in our buffer.
      */
@@ -201,31 +213,28 @@ private void SaveConsoleBuffer( console_buf_saved_t *save )
      * right corner is (width - 1, Y + incr - 1).  This should define
      * a region of size width by incr.  Don't worry if this region is
      * too large for the remaining buffer; it will be cropped.
-     * This code based on Vim 7.2
+     * This code is partly based on Vim 7.2.
      */
     region.Top = Y;
     region.Bottom = Y + incr - 1;
-    if( !ReadConsoleOutput( console_handle, save->buffer, save->csbi.dwSize,
+    if( !ReadConsoleOutputW( console_handle, save->buffer, save->csbi.dwSize,
 		pos, &region ) ) {
       free( save->buffer );
       save->buffer = NULL;
+      free( save->regions );
+      save->regions = NULL;
       return;
     }
+    save->regions[i] = region;
   }
 }
 
 private void RestoreConsoleBuffer( console_buf_saved_t *save )
 {
-  if( save->buffer ){
-    COORD      pos;
-    SMALL_RECT region;
+  if( NULL != save->buffer ){
     HWND       hwnd;
     RECT       rect;
-
-    pos.X = pos.Y = 0;
-    region.Top = region.Left = 0;
-    region.Bottom = save->csbi.dwSize.Y - 1;
-    region.Right = save->csbi.dwSize.X - 1;
+    int        i;
 
     /* Restore window size */
     hwnd = GetConsoleWindow();
@@ -248,11 +257,20 @@ private void RestoreConsoleBuffer( console_buf_saved_t *save )
       return;
     if( !SetConsoleTextAttribute( console_handle, save->csbi.wAttributes ) )
       return;
-    if( !WriteConsoleOutput( console_handle, save->buffer, save->csbi.dwSize,
-			     pos, &region ) )
-      return;
+    for(i = 0; i < save->num_region; i++){
+      SMALL_RECT region = save->regions[i];
+      COORD      pos;
+
+      pos.X = save->regions[i].Left;
+      pos.Y = save->regions[i].Top;
+      if( !WriteConsoleOutputW( console_handle, save->buffer,
+	    save->csbi.dwSize, pos, &region ) )
+	return;
+    }
     free( save->buffer );
     save->buffer = NULL;
+    free( save->regions );
+    save->regions = NULL;
   }
 }
 
