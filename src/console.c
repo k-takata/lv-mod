@@ -183,9 +183,9 @@ private void SaveConsoleBuffer( console_buf_saved_t *save )
 
   GetWindowPlacement( GetConsoleWindow(), &save->wndpl );
   SetLastError( NO_ERROR );
-  if ( !GetConsoleScreenBufferInfo( console_handle, &save->csbi ) )
+  if( !GetConsoleScreenBufferInfo( console_handle, &save->csbi ) )
     return;
-  if ( !GetConsoleCursorInfo( console_handle, &save->cci ) )
+  if( !GetConsoleCursorInfo( console_handle, &save->cci ) )
     return;
   size = save->csbi.dwSize.X * save->csbi.dwSize.Y;
   save->buffer = (PCHAR_INFO)Malloc( size * sizeof( CHAR_INFO ) );
