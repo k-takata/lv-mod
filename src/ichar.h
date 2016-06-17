@@ -12,9 +12,13 @@
  * international character
  */
 
-typedef unsigned short		ic_t;
+#ifdef MSDOS
+typedef unsigned long		ic_t;
+#else /* MSDOS */
+typedef unsigned int		ic_t;
+#endif /* MSDOS */
 
-#define ICHAR_WIDTH		2
+#define ICHAR_WIDTH		4
 
 #define CNTRLWIDTH_SHORTFORM	1	/* 0x00 .. 0x1f */
 #define CNTRLWIDTH_MIDDLEFORM	2	/* 0x20 .. 0x7e */

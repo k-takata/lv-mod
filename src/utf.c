@@ -200,6 +200,25 @@ utfContinue:
 	      DecodeAddUnicode( state->attr, uni );
 	  }
 	}
+      } else if( 0xf0 == ( 0xf8 & ch ) ){
+	/* 1st of 4 */
+	uni = (ic_t)( 0x07 & ch ) << 18;
+	GetChar( ch );
+	if( 0x80 == ( 0xc0 & ch ) ){
+	  /* trailor */
+	  uni |= (ic_t)( 0x3f & ch ) << 12;
+	  GetChar( ch );
+	  if( 0x80 == ( 0xc0 & ch ) ){
+	    /* trailor */
+	    uni |= (ic_t)( 0x3f & ch ) << 6;
+	    GetChar( ch );
+	    if( 0x80 == ( 0xc0 & ch ) ){
+	      /* trailor */
+	      uni |= (ic_t)( 0x3f & ch );
+	      DecodeAddUnicode( state->attr, uni );
+	    }
+	  }
+	}
       } else {
 	decoding_penalty++;
 	DecodeAddControl( ch );
@@ -329,8 +348,13 @@ public void EncodeUTF8( i_str_t *istr, int head, int tail,
 	} else if( ic < 0x0800U ){
 	  EncodeAddChar( attr, 0xc0 | ( ic >> 6 ) );
 	  EncodeAddChar( attr, 0x80 | ( 0x3f & ic ) );
-	} else {
+	} else if( ic < 0x10000U ){
 	  EncodeAddChar( attr, 0xe0 | ( ic >> 12 ) );
+	  EncodeAddChar( attr, 0x80 | ( 0x3f & ( ic >> 6 ) ) );
+	  EncodeAddChar( attr, 0x80 | ( 0x3f & ( ic ) ) );
+	} else {
+	  EncodeAddChar( attr, 0xf0 | ( ic >> 18 ) );
+	  EncodeAddChar( attr, 0x80 | ( 0x3f & ( ic >> 12 ) ) );
 	  EncodeAddChar( attr, 0x80 | ( 0x3f & ( ic >> 6 ) ) );
 	  EncodeAddChar( attr, 0x80 | ( 0x3f & ( ic ) ) );
 	}
@@ -388,7 +412,18 @@ public void DecodeUTF16( state_t *state, byte codingSystem )
     } else if( ch1 == 0 && ch2 < (ic_t)DEL ){
       DecodeAddIchar( ASCII, (ic_t)ch2, state->attr );
     } else {
-      uni = (ic_t)(( ch1 << 8 ) | ch2);
+      uni = (ic_t)(( ch1 << 8 ) | ch2 );
+      if( 0xd800 == ( 0xfc00 & uni ) ){	/* High surrogate */
+	if( UTF_16LE == codingSystem ){
+	  GetChar( ch2 );
+	  GetChar( ch1 );
+	} else {
+	  GetChar( ch1 );
+	  GetChar( ch2 );
+	}
+	uni = (( uni & 0x03ff ) << 10 )
+	      + ((( ch1 << 8 ) | ch2 ) & 0x03ff ) + 0x10000;
+      }
       if( uni != UNICODE_BOM )
 	DecodeAddUnicode( state->attr, uni );
     }
@@ -418,12 +453,28 @@ public void EncodeUTF16( i_str_t *istr, int head, int tail,
       } else {
 	if( UNICODE != cset )
 	  ic = RevUNI( ic, &cset );
-	if( UTF_16LE == codingSystem ){
-	  EncodeAddChar( attr, 0xff & ic );
-	  EncodeAddChar( attr, ic >> 8 );
+	if( ic >= 0x10000 ){
+	  ic_t high = ( ic >> 10 ) + 0xd7c0;
+	  ic_t low = ( ic & 0x03ff ) + 0xdc00;
+	  if( UTF_16LE == codingSystem ){
+	    EncodeAddChar( attr, 0xff & high );
+	    EncodeAddChar( attr, high >> 8 );
+	    EncodeAddChar( attr, 0xff & low );
+	    EncodeAddChar( attr, low >> 8 );
+	  } else {
+	    EncodeAddChar( attr, high >> 8 );
+	    EncodeAddChar( attr, 0xff & high );
+	    EncodeAddChar( attr, low >> 8 );
+	    EncodeAddChar( attr, 0xff & low );
+	  }
 	} else {
-	  EncodeAddChar( attr, ic >> 8 );
-	  EncodeAddChar( attr, 0xff & ic );
+	  if( UTF_16LE == codingSystem ){
+	    EncodeAddChar( attr, 0xff & ic );
+	    EncodeAddChar( attr, ic >> 8 );
+	  } else {
+	    EncodeAddChar( attr, ic >> 8 );
+	    EncodeAddChar( attr, 0xff & ic );
+	  }
 	}
       }
     } else if( FALSE == EncodeAddPseudo16( attr, ic, cset, binary,
