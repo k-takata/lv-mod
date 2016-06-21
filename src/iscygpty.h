@@ -1,7 +1,11 @@
 /*
- * iscygpty.h
+ * iscygpty.h -- part of ptycheck
+ * https://github.com/k-takata/ptycheck
  *
- * Copyright (c) 2015 K.Takata
+ * Copyright (c) 2015-2016 K.Takata
+ *
+ * You can redistribute it and/or modify it under the terms of either
+ * the MIT license (as described below) or the Vim license.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
