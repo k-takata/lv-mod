@@ -43,7 +43,17 @@
  * http://www.microsoft.com/en-us/download/details.aspx?id=22599
  * Needed for WinXP. */
 # include <fileextd.h>
-#endif
+#else /* USE_FILEEXTD */
+/* VC 8 or earlier. */
+# if defined(_MSC_VER) && (_MSC_VER < 1500)
+#  ifdef ENABLE_STUB_IMPL
+#   define STUB_IMPL
+#  else
+#   error "Win32 FileID API Library is required for VC2005 or earlier."
+#  endif
+# endif
+#endif /* USE_FILEEXTD */
+
 
 #include "iscygpty.h"
 
@@ -97,6 +107,9 @@ static void setup_fileid_api(void)
 /* Check if the fd is a cygwin/msys's pty. */
 int is_cygpty(int fd)
 {
+#ifdef STUB_IMPL
+	return 0;
+#else
 	HANDLE h;
 	int size = sizeof(FILE_NAME_INFO) + sizeof(WCHAR) * MAX_PATH;
 	FILE_NAME_INFO *nameinfo;
@@ -151,6 +164,7 @@ int is_cygpty(int fd)
 	}
 	free(nameinfo);
 	return (p != NULL);
+#endif /* STUB_IMPL */
 }
 
 /* Check if at least one cygwin/msys pty is used. */
