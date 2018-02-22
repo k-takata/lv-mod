@@ -30,6 +30,26 @@ Back to <A HREF="index.html">LV Homepage</A>.
 <HR WIDTH="50%">
 
 <UL>
+<li> ver 4.51.d (Feb.22nd,2018) (by K.Takata)<br>
+	<ul>
+	<li> Support U+10000 or larger codepoints with UTF-8/16.
+	<li> win32: Revise window size handling.
+	<li> Fix crash when trying to search too long string.
+	<li> Support some additional command line options: --help, --version, --.
+	</ul>
+<li> ver 4.51.c (Jun.7th,2016) (by K.Takata)<br>
+	<ul>
+	<li> Support Win32 (thanks to @amuramatsu and @mattn).
+	<li> Support UTF-16 (thanks to @amuramatsu).
+	<li> Import patches from Debian.
+	<li> Use automake for the build system.
+	<li> Fix many bugs.
+	</ul>
+<li> ver 4.51.b (May 14th,2012) (by K.Takata)<br>
+	<ul>
+	<li> Change the default encoding to UTF-8.
+	<li> Add -F (filter) option. Also add support for xzcat.
+	</ul>
 <li> ver 4.51.a (Oct.30th,2005) (Masanori GOTO version)<br>
 	<ul>
 	<li> Add largefile support, now lv can handle over 2GB files on 32 bit architectures that conform to Large File Summit.
@@ -119,7 +139,7 @@ Back to <A HREF="index.html">LV Homepage</A>.
 	<UL>
 	<LI> Added ISO-8859-10,11,13,14,15,16.
 	<LI> Changed coding system names for '=' key because they
-	     were confusing because they are different from 
+	     were confusing because they are different from
 	     naming for command line options.  I adopted full names
 	     because I could not find any reason the names have to
 	     be short.

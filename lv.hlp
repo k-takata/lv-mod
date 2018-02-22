@@ -339,7 +339,7 @@ RREEGGUULLAARR EEXXPPRREESSSSIIOONN
        Mutually overlapping ranges (or charset) are not guaranteed.
 
 SSEEEE AALLSSOO
-       LV Homepage: http://www.ff.iij4u.or.jp/~nrt/lv/
+       LV-mod Homepage: https://github.com/k-takata/lv-mod
 
 CCOOPPYYRRIIGGHHTT
        All rights reserved. Copyright (C) 1996-2004 by NARITA Tomio.
@@ -359,8 +359,8 @@ CCOOPPYYRRIIGGHHTT
        59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 BBUUGG RREEPPOORRTT
-       Please send bug reports to: nrt@ff.iij4u.or.jp
+       Please send bug reports to: https://github.com/k-takata/lv-mod/issues
 
 
 
-                            v.4.51 (Jan.16th,2004)                       LV(1)
+                           v.4.51.d (Feb.22nd,2018)                      LV(1)
