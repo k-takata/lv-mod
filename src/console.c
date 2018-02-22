@@ -248,10 +248,14 @@ private void RestoreConsoleBuffer( console_buf_saved_t *save )
     }
     SetWindowPlacement( hwnd, &save->wndpl );
 
+    /* Try twice to restore window and buffer size correctly. */
+    SetConsoleScreenBufferSize( console_handle, save->csbi.dwSize );
+    SetConsoleWindowInfo( console_handle, TRUE, &save->csbi.srWindow );
     if( !SetConsoleScreenBufferSize( console_handle, save->csbi.dwSize ) )
       return;
     if( !SetConsoleWindowInfo( console_handle, TRUE, &save->csbi.srWindow ) )
       return;
+
     if( !SetConsoleCursorPosition( console_handle,
 				   save->csbi.dwCursorPosition ) )
       return;
@@ -420,6 +424,10 @@ public void ConsoleGetWindowSize()
   height = csbi.srWindow.Bottom - csbi.srWindow.Top;
   if( width != WIDTH || height != HEIGHT ){
     window_changed = TRUE;
+    if( WIDTH != -1 && HEIGHT != -1 ){
+      COORD coord = {width, height + 1};
+      SetConsoleScreenBufferSize( console_handle, coord );
+    }
     WIDTH = width;
     HEIGHT = height;
   }
@@ -491,6 +499,7 @@ public void ConsoleTermInit()
   no_scroll		= FALSE;
 
   console_handle = GetStdHandle( STD_OUTPUT_HANDLE );
+  WIDTH = HEIGHT = -1;
   ConsoleGetWindowSize();
 #endif /* _WIN32 */
 
@@ -602,11 +611,13 @@ public void ConsoleSetUp()
   GetConsoleScreenBufferInfo( console_handle, &csbi );
   console_attr = csbi.wAttributes;
   rect = csbi.srWindow;
-  coord = GetLargestConsoleWindowSize( console_handle );
+  coord.X = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  coord.Y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
   SetConsoleScreenBufferSize( console_handle, coord );
   GetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), &initial_mode );
   new_mode = initial_mode &
     ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT );
+  new_mode |= ENABLE_WINDOW_INPUT;
   SetConsoleMode( GetStdHandle( STD_INPUT_HANDLE ), new_mode );
   ConsoleClearScreen();
 #endif /* _WIN32 */
