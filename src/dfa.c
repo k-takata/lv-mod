@@ -308,6 +308,7 @@ public byte *ReMakeDFA( i_str_t *istr )
 	    SetFreeAll( included );
 	    SetFreeAll( used );
 	    ReFreeAll( reRoot );
+	    reRoot = NULL;
 
 	    for( i = 0 ; i < dsIdx ; i++ )
 	      SetFreeAll( dStates[ i ].state );
