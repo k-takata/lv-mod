@@ -357,6 +357,18 @@ private void ConfArg( conf_t *conf, byte **argv, byte *location )
       case SP:
       case HT:
 	break;
+      case '-':
+	if( 0 == strcmp( s + 1, "help" ) ){
+	  conf->file = lvHelpFile;
+	  break;
+	} else if( 0 == strcmp( s + 1, "version" ) ){
+	  Banner();
+	  exit( 0 );
+	} else if( 0x00 == *(s + 1) ){
+	  conf->options = FALSE;
+	  break;
+	}
+	/* fall through */
       default:
 	UnknownOption( s, location );
       }

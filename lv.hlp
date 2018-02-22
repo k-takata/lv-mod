@@ -7,15 +7,15 @@ NNAAMMEE
 
 SSYYNNOOPPSSIISS
        llvv,, llggrreepp
-       llvv -h
-       llvv -V
+       llvv -h, --help
+       llvv -V, --version
        llvv [-acdfgiklmnqstuvz] [+acdfgiklmnqstuvz]
             [-A_c_o_d_i_n_g_-_s_y_s_t_e_m] [-I_c_o_d_i_n_g_-_s_y_s_t_e_m] [-K_c_o_d_i_n_g_-_s_y_s_t_e_m]
             [-O_c_o_d_i_n_g_-_s_y_s_t_e_m] [-P_c_o_d_i_n_g_-_s_y_s_t_e_m] [-D_c_o_d_i_n_g_-_s_y_s_t_e_m]
             [-Ss_s_e_q] [-Sr_s_e_q] [-Sb_s_e_q] [-Su_s_e_q] [-Sh_s_e_q]
             [-T_n_u_m_b_e_r] [-W_w_i_d_t_h] [-H_h_e_i_g_h_t] [-E'_e_d_i_t_o_r'] [-F'_f_i_l_t_e_r']
             [-+] [+_n_u_m_b_e_r] [+/_g_r_e_p_-_p_a_t_t_e_r_n]
-            [-] (_g_r_e_p_-_p_a_t_t_e_r_n) [_f_i_l_e_s _._._.]
+            [-|--] (_g_r_e_p_-_p_a_t_t_e_r_n) [_f_i_l_e_s _._._.]
 
 DDEESSCCRRIIPPTTIIOONN
        _M_u_l_t_i_l_i_n_g_u_a_l _f_i_l_e _v_i_e_w_e_r
@@ -217,7 +217,7 @@ OOPPTTIIOONNSS
               You  can  also  turn  OFF specified options, using ``+<option>''
               like +c, +d, ... +z.
 
-       -      Treat the following arguments as filenames
+       -, --  Treat the following arguments as filenames
 
        _g_r_e_p_-_p_a_t_t_e_r_n
               lv works like _g_r_e_p (1) when its name is _l_g_r_e_p
@@ -228,9 +228,11 @@ OOPPTTIIOONNSS
        +/_g_r_e_p_-_p_a_t_t_e_r_n
               Search  the specified pattern immediately when lv is invoked.
 
-       -V     Show lv version
+       -V, --version
+              Show lv version
 
-       -h     Show this help
+       -h, --help
+              Show this help
 
 CCOONNFFIIGGUURRAATTIIOONN
        Options can be described in  configuration  file  ``.lv''  (``_lv''  on

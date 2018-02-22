@@ -5,10 +5,10 @@ lv \- a Powerful Multilingual File Viewer / Grep
 .B lv, lgrep
 .br
 .B lv
-\-h
+\-h, \-\-help
 .br
 .B lv
-\-V
+\-V, \-\-version
 .br
 .B lv
 [\-acdfgiklmnqstuvz] [+acdfgiklmnqstuvz]
@@ -23,7 +23,7 @@ lv \- a Powerful Multilingual File Viewer / Grep
 .br
      [\-+] [+\fInumber\fP] [+/\fIgrep-pattern\fP]
 .br
-     [\-] (\fIgrep-pattern\fP) [\fIfiles ...\fP]
+     [\-|\-\-] (\fIgrep-pattern\fP) [\fIfiles ...\fP]
 .SH DESCRIPTION
 .IP "\fIMultilingual file viewer\fP"
 \fIlv\fP is a powerful multilingual file viewer.
@@ -237,7 +237,7 @@ Clear all options
 .br
 You can also turn OFF specified options,
 using ``+<option>'' like +c, +d, ... +z.
-.IP "-"
+.IP "-, --"
 Treat the following arguments as filenames
 .IP "\fIgrep-pattern\fP"
 lv works like \fIgrep\fP (1) when its name is \fIlgrep\fP
@@ -245,9 +245,9 @@ lv works like \fIgrep\fP (1) when its name is \fIlgrep\fP
 Jump to the specified line immediately when lv is invoked.
 .IP "+/\fIgrep-pattern\fP"
 Search  the specified pattern immediately when lv is invoked.
-.IP "-V"
+.IP "-V, --version"
 Show lv version
-.IP "-h"
+.IP "-h, --help"
 Show this help
 .SH "CONFIGURATION"
 Options can be described in configuration file ``.lv'' (``_lv'' on MSDOS)
